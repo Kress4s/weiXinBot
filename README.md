@@ -1,4 +1,16 @@
 # weiXinBot
 ## 微信API
-###go build .
-####./weiXinBot start
+## Project setup
+```
+go build .
+```
+
+### Compiles and hot-reloads for development
+```
+./weiXinBot start
+```
+
+### Compiles and minifies for production
+```
+./weiXinBot start
+```

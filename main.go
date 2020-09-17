@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	_ "weiXinBot/app/bridage/common/dbmysql"
+	_ "weiXinBot/app/bridage/models"
 	_ "weiXinBot/app/routers"
 
 	"github.com/astaxie/beego"

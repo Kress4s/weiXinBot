@@ -6,6 +6,11 @@ const (
 )
 
 const (
+	TOKEN_KEY = "WX_TOKEN"
+	WX_ID     = "WX_ID"
+)
+
+const (
 	BASE_URL = "49.234.86.244:8080" //微信对接baselink
 )
 

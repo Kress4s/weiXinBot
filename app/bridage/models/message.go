@@ -21,7 +21,7 @@ type Message struct {
 	Card        *Card     `orm:"rel(fk);null"`                                  //名片信息
 	Contact     *Contact  `orm:"rel(fk);null"`                                  //联系人信息
 	Group       *Group    `orm:"rel(fk);null"`                                  //群信息
-	WxID        string    `orm:"size(50) column(wx_id)"`                        //所属微信号消息
+	WxID        string    `orm:"size(50);column(wx_id)"`                        //所属微信号消息
 	Emoji       string    `orm:"size(50); column(emoji)" json:"emoji"`          //emoji的md5值
 }
 
@@ -30,7 +30,7 @@ type Card struct {
 	ID           int64  `orm:"auto;column(id)"`
 	CardAlias    string `orm:"size(50);column(card_alias)" json:"card_alias"`
 	CardID       string `orm:"size(50);column(card_id)" json:"card_id"`
-	CardNickName string `orm:"size(50);column(card_nice_name)" json:"card_nice_name"`
+	CardNickName string `orm:"size(50);column(card_nick_name)" json:"card_nick_name"`
 }
 
 func init() {

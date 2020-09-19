@@ -55,7 +55,7 @@ func main() {
 func cmdUsage() {
 	fmt.Println(`
 		USAGE
-			betaStore [commond]
+			WeixinBot [commond]
 		AVAILABLE COMMANDS
 			start                     Start beta store server node.
 			orm                       Operate the database.

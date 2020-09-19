@@ -59,3 +59,22 @@ const (
 )
 
 // sns
+const ()
+
+// message info
+const (
+	TEXT_TYPE_MESSAGE = iota
+	IMAGE_TYPE_MESSAGE
+	VIDEO_TYPE_MESSAGE
+	CARD_TYPE_MESSAGE
+	EMOJI_TYPE_MESSAGE
+	SMALL_PROGRAM_TYPE_MESSAGE
+)
+
+// message source
+const (
+	CONTACT_MESSAGE = iota
+	GROUP_MESSAGE
+	PUBLIC_MESSAGE
+	SYSTEM_MESSAGE
+)

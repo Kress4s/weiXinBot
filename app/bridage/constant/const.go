@@ -5,13 +5,29 @@ const (
 	EXPEIRE_WXACCOUNT_CODE = 2001 //微信登录状态过期状态码(暂且不用)
 )
 
+//header
+const (
+	H_AUTHORIZATION = "Authorization" //
+	H_WXID          = "wx_id"         //微信ID
+	H_DEVID         = "DeviceID"      //设备ID
+	H_UUID          = "UUID"          //变化的
+)
+
+// params
+const (
+	P_DEVICE_ID = "device_id"
+	P_UUID      = "uuid"
+)
+
+// session
 const (
 	TOKEN_KEY = "WX_TOKEN"
 	WX_ID     = "WX_ID"
+	UUID      = "uuid"
 )
 
 const (
-	BASE_URL = "49.234.86.244:8080" //微信对接baselink
+	BASE_URL = "http://49.234.86.244:8080" //微信对接baselink
 )
 
 // login

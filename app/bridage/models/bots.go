@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
@@ -19,6 +21,9 @@ type Bots struct {
 	Signature      string     `orm:"size(50);column(signature)" json:"signature"`
 	Alias          string     `orm:"size(50);column(alias)" json:"alias"`
 	Device         string     `orm:"size(50);column(device)" json:"device"`
+	LoginStatus    int        `orm:"column(login_status)" json:"login_status"` // 机器人登录状态
+	Status         int        `orm:"column(status)" json:"status"`             // 机器人状态
+	ExpireTime     time.Time  `orm:"type(datetime);column(expiretime)"`        // 到期时间
 	Manager        *Manager   `orm:"rel(fk)"`
 	Contacts       []*Contact `orm:"reverse(many)"` //好友
 	Groups         []*Group   `orm:"reverse(many)"`

@@ -21,9 +21,10 @@ const (
 
 // session
 const (
-	TOKEN_KEY = "WX_TOKEN"
-	WX_ID     = "WX_ID"
-	UUID      = "uuid"
+	S_TOKEN_KEY = "WX_TOKEN"
+	S_WX_ID     = "WX_ID"
+	S_UUID      = "uuid"
+	S_ACCOUNT   = "accountid"
 )
 
 const (
@@ -110,4 +111,10 @@ const (
 	SOURCE_LINK
 	SOURCE_APP
 	SOURCE_EMOJI
+)
+
+// 认证方式
+const (
+	AUTH_CODE = "authCode"
+	AUTH_PWD  = "authPwd"
 )

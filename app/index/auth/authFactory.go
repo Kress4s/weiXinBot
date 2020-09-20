@@ -4,13 +4,13 @@ import "fmt"
 
 // Auth ...
 type Auth interface {
-	Auth(string) (string, error)
+	Auth(...string) (bool, error) //认证结果和错误与否信息
 }
 
-var authMap = make(map[string]*Auth)
+var authMap = make(map[string]Auth)
 
 // Register ...
-func Register(authType string, auth *Auth) {
+func Register(authType string, auth Auth) {
 	if auth == nil {
 		panic("auth: Register failed, auth is nil")
 	}
@@ -21,7 +21,7 @@ func Register(authType string, auth *Auth) {
 }
 
 // GetAuthIns ...
-func GetAuthIns(authType string) (*Auth, error) {
+func GetAuthIns(authType string) (Auth, error) {
 	if authType == "" {
 		panic("auth: authType is null")
 	}

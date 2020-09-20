@@ -7,7 +7,7 @@ import (
 // Manager ...
 type Manager struct {
 	ID       int64   `orm:"auto;column(id)"`
-	IsAdmcin bool    `orm:"column(is_admin);default(0)"`
+	IsAdmin  bool    `orm:"column(is_admin);default(0)"`
 	Account  string  `orm:"size(50);column(account)" `
 	PassWord string  `orm:"size(50);column(pwd)"`
 	NickName string  `orm:"size(50);column(nickname)"`

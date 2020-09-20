@@ -19,6 +19,7 @@ type User struct {
 	Signature      string     `orm:"size(50);column(signature)" json:"signature"`
 	Alias          string     `orm:"size(50);column(alias)" json:"alias"`
 	Device         string     `orm:"size(50);column(device)" json:"device"`
+	Manager        *Manager   `orm:"rel(fk)"`
 	Contacts       []*Contact `orm:"reverse(many)"` //好友
 	Groups         []*Group   `orm:"reverse(many)"`
 }

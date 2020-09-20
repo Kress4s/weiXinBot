@@ -30,7 +30,6 @@ func (c *IndexController) GetQrCode() {
 	var restBody common.StandardRestResult
 	var resp *http.Response
 	var err error
-	var isNeedAdd bool
 	defer func() {
 		if err == nil {
 			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: restBody}
@@ -52,7 +51,6 @@ func (c *IndexController) GetQrCode() {
 			err = fmt.Errorf("header[%s] cant be null", constant.H_DEVID)
 			return
 		}
-		isNeedAdd = true
 	}
 	if resp, err = httplib.Get(constant.LOGIN_QRCODE_URL).Param(constant.P_DEVICE_ID, deviceID).DoRequest(); err != nil {
 		logs.Error("get URL[%s] failed, err is ", err.Error())
@@ -70,34 +68,34 @@ func (c *IndexController) GetQrCode() {
 		return
 	}
 	// session记录uuid和device的关系(更新user) conf配置session
-	if err = c.Ctx.Input.CruSession.Set(constant.UUID, deviceID); err != nil {
-		logs.Error("Set session[%s] failed, err is ", constant.UUID, err.Error())
-		return
-	}
-	if isNeedAdd {
-		// 把deviceID存进User表
-		_, err = bridage.AddUserByDeviceID(deviceID)
-	}
+	// if err = c.Ctx.Input.CruSession.Set(constant.UUID, deviceID); err != nil {
+	// 	logs.Error("Set session[%s] failed, err is ", constant.UUID, err.Error())
+	// 	return
+	// }
+	// if isNeedAdd {
+	// 	// 把deviceID存进User表
+	// 	_, err = bridage.AddUserByDeviceID(deviceID)
+	// }
 }
 
 // Check ...
 func (c *IndexController) Check() {
 	var resp *http.Response
-	var restBody struct {
-		Code    int    `json:"code"`
-		Message string `json:"msg"`
-		Data    struct {
-			Alias      string `json:"alias"`
-			HeadImgURL string `json:"head_image_url"`
-			NickName   string `json:"nick_name"`
-			Token      string `json:"token"`
-			WXID       string `json:"wx_id"`
-		} `json:"data"`
-	}
+	// var restBody struct {
+	// 	Code    int    `json:"code"`
+	// 	Message string `json:"msg"`
+	// 	Data    struct {
+	// 		Alias      string `json:"alias"`
+	// 		HeadImgURL string `json:"head_image_url"`
+	// 		NickName   string `json:"nick_name"`
+	// 		Token      string `json:"token"`
+	// 		WXID       string `json:"wx_id"`
+	// 	} `json:"data"`
+	// }
+	var restBody *common.StandardRestResult
 	var err error
-	deviceID := c.Ctx.Input.CruSession.Get(constant.UUID)
+	// deviceID := c.Ctx.Input.CruSession.Get(constant.UUID)
 	UUID := c.Ctx.Input.Header(constant.H_UUID)
-	fmt.Println(">>>>>DeviceID is ", deviceID.(string))
 	defer func() {
 		if err == nil {
 			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: restBody}
@@ -105,11 +103,11 @@ func (c *IndexController) Check() {
 			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 		}
 		// 清除session
-		c.Ctx.Input.CruSession.Delete(constant.UUID)
+		// c.Ctx.Input.CruSession.Delete(constant.UUID)
 		c.ServeJSON()
 	}()
-	if len(deviceID.(string)) == 0 || len(UUID) == 0 {
-		err = fmt.Errorf("get deviceID/UUID from session failed, err is %s", err.Error())
+	if len(UUID) == 0 {
+		err = fmt.Errorf("get UUID from session failed, err is %s", err.Error())
 		return
 	}
 	if resp, err = httplib.Get(constant.LOGIN_CHECK_URL).Param(constant.P_UUID, UUID).DoRequest(); err != nil {
@@ -125,15 +123,8 @@ func (c *IndexController) Check() {
 		logs.Error("json Unmarshal failed, err is ", err.Error())
 		return
 	}
+	// 异常
 	if restBody.Code != 0 {
 		err = fmt.Errorf(restBody.Message)
-		return
 	}
-	user := bridage.User{
-		Alias:        restBody.Data.Alias,
-		BigHeadImage: restBody.Data.HeadImgURL,
-		NickName:     restBody.Data.NickName,
-		WXID:         restBody.Data.WXID,
-	}
-	err = bridage.UpdateUserByLoginCheckFunc(&user)
 }

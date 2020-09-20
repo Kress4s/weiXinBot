@@ -14,7 +14,7 @@ type Manager struct {
 	Tel      string  `orm:"size(50);column(tel)"`
 	Avatar   string  `orm:"size(100);column(avatar)"`
 	BotsNum  int     `orm:"column(botsnum)"`
-	Users    []*User `orm:"reverse(many)"`
+	Bots     []*Bots `orm:"reverse(many)"`
 }
 
 func init() {

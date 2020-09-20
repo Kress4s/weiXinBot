@@ -5,7 +5,7 @@ import "github.com/astaxie/beego/orm"
 // Contact ...
 type Contact struct {
 	WXID           string     `orm:"pk;size(200);column(id)" json:"id"`
-	User           *User      `orm:"rel(fk)"`
+	Bots           *Bots      `orm:"rel(fk)"`
 	BigHeadImage   string     `orm:"size(200);column(head_big_image_url)" json:"head_big_image_url"`
 	SmallHeadImage string     `orm:"size(200);column(head_small_image_url)" json:"head_small_image_url"`
 	NickName       string     `orm:"size(50);column(nick_name)" json:"nick_name"`

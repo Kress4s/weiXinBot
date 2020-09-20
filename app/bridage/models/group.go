@@ -12,7 +12,7 @@ type Group struct {
 	MemberNum      int        `orm:"column(member_num)" json:"member_num"`                               //
 	HeadSmallImage string     `orm:"size(200);column(head_small_image_url)" json:"head_small_image_url"` //
 	Listers        string     `orm:"size(500);column(listers)"`                                          //成员微信号的IDs，”，“连接 接口返回值[]不好处理 记录1
-	User           *User      `orm:"rel(fk)"`
+	Bots           *Bots      `orm:"rel(fk)"`
 	Messages       []*Message `orm:"reverse(many)"`
 }
 

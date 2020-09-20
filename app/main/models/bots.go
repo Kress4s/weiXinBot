@@ -6,9 +6,9 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
-// AddUser ...
-func AddUser(user *bridage.User) (id int64, err error) {
+// AddBot ...
+func AddBot(bot *bridage.Bots) (id int64, err error) {
 	o := orm.NewOrm()
-	id, err = o.Insert(user)
+	id, err = o.Insert(bot)
 	return
 }

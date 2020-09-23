@@ -14,6 +14,14 @@ import (
 )
 
 func main() {
+	// var checkAcess = func(ctx *context.Context) {
+	// 	if ctx.Request.Method == "POST" && ctx.Input.Session(constant.S_ACCOUNT) == nil {
+	// 		ctx.ResponseWriter.WriteHeader(constant.EXPEIRE_ACCOUNT_CODE)
+	// 	}
+	// }
+	// 接口认证(调试阶段屏蔽)
+	// beego.InsertFilter("!(^/manager)", beego.BeforeRouter, checkAcess)
+
 	//允许跨站访问
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,

@@ -24,6 +24,7 @@ type Bots struct {
 	LoginStatus    int        `orm:"column(login_status)" json:"login_status"` // 机器人登录状态
 	Status         int        `orm:"column(status)" json:"status"`             // 机器人状态
 	ExpireTime     time.Time  `orm:"type(datetime);column(expiretime)"`        // 到期时间
+	Token          string     `orm:"size(50);column(token)"`                   // Token
 	Manager        *Manager   `orm:"rel(fk)"`
 	Contacts       []*Contact `orm:"reverse(many)"` //好友
 	Groups         []*Group   `orm:"reverse(many)"`

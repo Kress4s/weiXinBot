@@ -8,9 +8,7 @@ import (
 type Manager struct {
 	ID       int64   `orm:"auto;column(id)"`
 	IsAdmin  bool    `orm:"column(is_admin);default(0)"`
-	Account  string  `orm:"size(50);column(account)" `
 	PassWord string  `orm:"size(50);column(pwd)"`
-	NickName string  `orm:"size(50);column(nickname)"`
 	Tel      string  `orm:"size(50);column(tel)"`
 	Avatar   string  `orm:"size(100);column(avatar)"`
 	BotsNum  int     `orm:"column(botsnum)"`
@@ -36,4 +34,13 @@ func AddManager(manager *Manager) (id int64, err error) {
 	o := orm.NewOrm()
 	_, err = o.Insert(manager)
 	return
+}
+
+//根据手机号查询是否存在注册记录
+func FindManagerByTel(tel string) bool {
+
+	o := orm.NewOrm()
+	exist := o.QueryTable("manager").Filter("Tel", tel).Exist()
+
+	return exist
 }

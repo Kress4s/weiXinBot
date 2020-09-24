@@ -1,6 +1,8 @@
 package index
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"weiXinBot/app/bridage/common"
@@ -58,8 +60,32 @@ func (c *MgrIndexController) Register() {
 		}
 		c.ServeJSON()
 	}()
+
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &newMgr); err != nil {
+
 		return
 	}
+
+	//查询是否存在手机号注册记录
+	bool := bridageModels.FindManagerByTel(newMgr.Tel)
+
+	if bool == true {
+		err = fmt.Errorf("手机号已经被注册")
+		return
+	}
+
+	newMgr.PassWord = encodeMD5(newMgr.PassWord)
+
 	_, err = bridageModels.AddManager(&newMgr)
+}
+
+/**
+md5加密
+*/
+func encodeMD5(value string) string {
+
+	m := md5.New()
+	m.Write([]byte(value))
+
+	return hex.EncodeToString(m.Sum(nil))
 }

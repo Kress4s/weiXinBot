@@ -20,9 +20,9 @@ func init() {
 }
 
 // GetManagerByAccount ...
-func GetManagerByAccount(account string) (v *Manager, err error) {
+func GetManagerByAccount(tel string) (v *Manager, err error) {
 	o := orm.NewOrm()
-	v = &Manager{Tel: account}
+	v = &Manager{Tel: tel}
 	if err = o.Read(v, "Tel"); err != nil {
 		return nil, err
 	}
@@ -36,11 +36,9 @@ func AddManager(manager *Manager) (id int64, err error) {
 	return
 }
 
-//根据手机号查询是否存在注册记录
+// FindManagerByTel 根据手机号查询是否存在注册记录
 func FindManagerByTel(tel string) bool {
-
 	o := orm.NewOrm()
-	exist := o.QueryTable("manager").Filter("Tel", tel).Exist()
-
+	exist := o.QueryTable(new(Manager)).Filter("Tel", tel).Exist()
 	return exist
 }

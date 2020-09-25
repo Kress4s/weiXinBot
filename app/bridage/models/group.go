@@ -13,9 +13,9 @@ type Group struct {
 	HeadSmallImage string     `orm:"size(200);column(head_small_image_url)" json:"head_small_image_url"` //
 	Listers        string     `orm:"size(500);column(listers)"`                                          //成员微信号的IDs，”，“连接 接口返回值[]不好处理 记录1
 	IsNeedServe    bool       `orm:"column(isneedserve);default(0)"`                                     // 是否有服务功能
-	Bots           *Bots      `orm:"rel(fk)"`
-	GroupPlan      *GroupPlan `orm:"rel(fk)"` //群方案
-	Messages       []*Message `orm:"reverse(many)"`
+	Bots           *Bots      `orm:"rel(fk)"`                                                            //
+	GroupPlan      *GroupPlan `orm:"null;rel(fk)"`                                                       //群方案
+	Messages       []*Message `orm:"reverse(many)"`                                                      //
 }
 
 func init() {

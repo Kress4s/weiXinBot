@@ -17,6 +17,9 @@ func init() {
 		beego.NSNamespace("bot",
 			beego.NSInclude(&controllers.BotsController{}),
 		),
+		beego.NSNamespace("group",
+			beego.NSInclude(&controllers.GroupController{}),
+		),
 	)
 	beego.AddNamespace(ns1)
 }

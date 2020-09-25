@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	bridageModels "weiXinBot/app/bridage/models"
 
 	"github.com/astaxie/beego/orm"
@@ -9,6 +10,7 @@ import (
 // AddBot ...
 func AddBot(bot *bridageModels.Bots) (id int64, err error) {
 	o := orm.NewOrm()
+	bot.Token = fmt.Sprintf("Bearer %s", bot.Token)
 	id, err = o.Insert(bot)
 	return
 }

@@ -13,3 +13,18 @@ type StandardRestResult struct {
 	Message string      `json:"msg"`
 	Data    interface{} `json:"data"`
 }
+
+// 查询条件常量
+const (
+	MultiSelect      = "multi-select"       // 多选
+	MultiText        = "multi-text"         // 模糊多选
+	NumRange         = "num-range"          // 数字范围或者数字查询
+	CommaMultiSelect = "comma-multi-select" //数据库中存放是逗号分隔的值
+)
+
+// QueryConditon 表格查询条件对象
+type QueryConditon struct {
+	QueryKey    string
+	QueryType   string // multi-select  multi-text  num-range  comma-multi-select
+	QueryValues []string
+}

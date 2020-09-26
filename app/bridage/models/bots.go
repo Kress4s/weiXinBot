@@ -25,6 +25,7 @@ type Bots struct {
 	Status         int        `orm:"column(status)" json:"status"`             // 机器人状态
 	ExpireTime     time.Time  `orm:"type(datetime);column(expiretime)"`        // 到期时间
 	Token          string     `orm:"size(50);column(token)"`                   // Token
+	IsDeleted      bool       `orm:"column(is_deleted); default(0)"`           //逻辑删除字段
 	Manager        *Manager   `orm:"rel(fk)"`
 	Contacts       []*Contact `orm:"reverse(many)"` //好友
 	Groups         []*Group   `orm:"reverse(many)"`

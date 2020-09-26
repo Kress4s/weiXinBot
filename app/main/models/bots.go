@@ -130,7 +130,8 @@ func GetAllBots(querys []*common.QueryConditon, fields []string, sortby []string
 
 	var l []bridageModels.Bots
 	qs = qs.OrderBy(sortFields...).RelatedSel()
-	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
+	// add IsDelete filter
+	if _, err = qs.Limit(limit, offset).Filter("IsDeleted", false).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
 				ml = append(ml, v)
@@ -171,7 +172,14 @@ func DeleteBotByID(id int64) (err error) {
 	v := bridageModels.Bots{ID: id}
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&bridageModels.Bots{ID: id}); err == nil {
+		// 不做物理删除
+		// if num, err = o.Delete(&bridageModels.Bots{ID: id}); err == nil {
+		// 	logs.Debug("Number of Bots deleted in database:", num)
+		// }
+
+		// 逻辑删除
+		v.IsDeleted = true
+		if num, err = o.Update(&v); err == nil {
 			logs.Debug("Number of Bots deleted in database:", num)
 		}
 	}
@@ -182,7 +190,17 @@ func DeleteBotByID(id int64) (err error) {
 func MultiDeleteBotsByIDs(ids []interface{}) (err error) {
 	o := orm.NewOrm()
 	var num int64
-	if num, err = o.QueryTable(new(bridageModels.Bots)).Filter("ID__in", ids...).Delete(); err == nil {
+	// 物理删除
+	// if num, err = o.QueryTable(new(bridageModels.Bots)).Filter("ID__in", ids...).Delete(); err == nil {
+	// 	logs.Debug("Number of Bots deleted in database:", num)
+	// 	return nil
+	// }
+
+	//逻辑删除
+	if num, err = o.QueryTable(new(bridageModels.Bots)).Filter("ID__in", ids...).Update(
+		orm.Params{
+			"IsDeleted": true,
+		}); err == nil {
 		logs.Debug("Number of Bots deleted in database:", num)
 		return nil
 	}

@@ -12,6 +12,7 @@ func init() {
 	beego.Router("/index/login/check", &index.IndexController{}, "get:Check")
 	beego.Router("/manager/login/?:authtype", &index.MgrIndexController{}, "post:Login")
 	beego.Router("/manager/register", &index.MgrIndexController{}, "post:Register")
+	beego.Router("/manager/getmyinfo", &index.MgrIndexController{}, "get:GetMyInfo")
 
 	ns1 := beego.NewNamespace("/v1",
 		beego.NSNamespace("/bot",

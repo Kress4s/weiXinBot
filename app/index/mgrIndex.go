@@ -69,3 +69,22 @@ func (c *MgrIndexController) Register() {
 	newMgr.PassWord = string(common.Base64Encode([]byte(newMgr.PassWord)))
 	_, err = bridageModels.AddManager(&newMgr)
 }
+
+// GetMyInfo 获取登录用户详情
+func (c *MgrIndexController) GetMyInfo() {
+	var v, account interface{}
+	var err error
+	defer func() {
+		if err == nil {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		} else {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		}
+		c.ServeJSON()
+	}()
+	if account = c.Ctx.Input.CruSession.Get(constant.S_ACCOUNT); account == nil {
+		err = fmt.Errorf("get account from session failed")
+		return
+	}
+	v, err = bridageModels.GetManagerByAccount(account.(string))
+}

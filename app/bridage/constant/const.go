@@ -24,7 +24,7 @@ const (
 	S_TOKEN_KEY = "WX_TOKEN"
 	S_WX_ID     = "WX_ID"
 	S_UUID      = "uuid"
-	S_ACCOUNT   = "accountid"
+	S_ACCOUNT   = "tel"
 )
 
 const (

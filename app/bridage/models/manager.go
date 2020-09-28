@@ -20,13 +20,14 @@ func init() {
 }
 
 // GetManagerByAccount ...
-func GetManagerByAccount(tel string) (v *Manager, err error) {
+func GetManagerByAccount(tel string) (ret *Manager, err error) {
 	o := orm.NewOrm()
-	v = &Manager{Tel: tel}
-	if err = o.Read(v, "Tel"); err != nil {
-		return nil, err
+	v := Manager{Tel: tel}
+	if err = o.QueryTable(new(Manager)).Filter("Tel", tel).One(&v); err == nil {
+		o.LoadRelated(&v, "Bots")
+		return &v, nil
 	}
-	return v, nil
+	return nil, err
 }
 
 // AddManager ...

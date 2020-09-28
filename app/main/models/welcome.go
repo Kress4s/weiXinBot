@@ -11,29 +11,28 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
-// AddGrouplan ...
-func AddGrouplan(grouplan *bridageModels.GroupPlan) (id int64, err error) {
+// AddWelcome ...
+func AddWelcome(welcome *bridageModels.Welcome) (id int64, err error) {
 	o := orm.NewOrm()
-	id, err = o.Insert(grouplan)
+	id, err = o.Insert(welcome)
 	return
 }
 
-// GetGouplanByID ...
-func GetGouplanByID(id int64) (v *bridageModels.GroupPlan, err error) {
+// GetWelcomeByID ...
+func GetWelcomeByID(id int64) (v *bridageModels.Welcome, err error) {
 	o := orm.NewOrm()
-	v = &bridageModels.GroupPlan{ID: id}
+	v = &bridageModels.Welcome{ID: id}
 	if err = o.Read(v); err != nil {
-		o.LoadRelated(v, "Groups")
 		return nil, err
 	}
 	return v, nil
 }
 
-// GetAllGrouplan get all bots
-func GetAllGrouplan(querys []*common.QueryConditon, fields []string, sortby []string, order []string,
+// GetAllWelcome get all bots
+func GetAllWelcome(querys []*common.QueryConditon, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, totalcount int64, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(bridageModels.GroupPlan))
+	qs := o.QueryTable(new(bridageModels.Welcome))
 	// query QueryCondition
 	cond := orm.NewCondition()
 	for _, query := range querys {
@@ -127,7 +126,7 @@ func GetAllGrouplan(querys []*common.QueryConditon, fields []string, sortby []st
 		}
 	}
 
-	var l []bridageModels.GroupPlan
+	var l []bridageModels.Welcome
 	qs = qs.OrderBy(sortFields...).RelatedSel()
 	// add IsDelete filter
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
@@ -151,9 +150,9 @@ func GetAllGrouplan(querys []*common.QueryConditon, fields []string, sortby []st
 	return nil, 0, err
 }
 
-// UpdateGrouplanByID ...
-func UpdateGrouplanByID(m *bridageModels.GroupPlan) (err error) {
-	var v = bridageModels.GroupPlan{ID: m.ID}
+// UpdateWelcomeByID ...
+func UpdateWelcomeByID(m *bridageModels.Welcome) (err error) {
+	var v = bridageModels.Welcome{ID: m.ID}
 	o := orm.NewOrm()
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -164,25 +163,25 @@ func UpdateGrouplanByID(m *bridageModels.GroupPlan) (err error) {
 	return
 }
 
-// DeleteGrouplanByID deletes bot by Id and returns error if
+// DeleteWelcomeByID deletes bot by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteGrouplanByID(id int64) (err error) {
+func DeleteWelcomeByID(id int64) (err error) {
 	o := orm.NewOrm()
-	v := bridageModels.GroupPlan{ID: id}
+	v := bridageModels.Welcome{ID: id}
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&bridageModels.GroupPlan{ID: id}); err == nil {
+		if num, err = o.Delete(&bridageModels.Welcome{ID: id}); err == nil {
 			logs.Debug("Number of Bots deleted in database:", num)
 		}
 	}
 	return
 }
 
-// MultiDeleteGrouplanByIDs multi delete Bot
-func MultiDeleteGrouplanByIDs(ids []interface{}) (err error) {
+// MultiDeleteWelcomeByIDs multi delete Bot
+func MultiDeleteWelcomeByIDs(ids []interface{}) (err error) {
 	o := orm.NewOrm()
 	var num int64
-	if num, err = o.QueryTable(new(bridageModels.Bots)).Filter("ID__in", ids...).Delete(); err == nil {
+	if num, err = o.QueryTable(new(bridageModels.Welcome)).Filter("ID__in", ids...).Delete(); err == nil {
 		logs.Debug("Number of Bots deleted in database:", num)
 		return nil
 	}

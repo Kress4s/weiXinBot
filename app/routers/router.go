@@ -24,6 +24,9 @@ func init() {
 		beego.NSNamespace("/grouplan",
 			beego.NSInclude(&controllers.GrouPlanController{}),
 		),
+		beego.NSNamespace("/welcome",
+			beego.NSInclude(&controllers.WelcomeController{}),
+		),
 	)
 	beego.AddNamespace(ns1)
 }

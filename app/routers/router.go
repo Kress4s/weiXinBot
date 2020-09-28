@@ -13,11 +13,11 @@ func init() {
 	beego.Router("/manager/login/?:authtype", &index.MgrIndexController{}, "post:Login")
 	beego.Router("/manager/register", &index.MgrIndexController{}, "post:Register")
 
-	ns1 := beego.NewNamespace("v1",
-		beego.NSNamespace("bot",
+	ns1 := beego.NewNamespace("/v1",
+		beego.NSNamespace("/bot",
 			beego.NSInclude(&controllers.BotsController{}),
 		),
-		beego.NSNamespace("group",
+		beego.NSNamespace("/group",
 			beego.NSInclude(&controllers.GroupController{}),
 		),
 	)

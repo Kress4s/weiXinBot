@@ -17,33 +17,37 @@ type MgrIndexController struct {
 
 // Login ...
 func (c *MgrIndexController) Login() {
-	var account, password string
 	var psa bool
 	var err error
+	var manager *bridageModels.Manager
 	defer func() {
 		if err == nil {
-			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: manager}
 		} else {
 			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 		}
 		c.ServeJSON()
 	}()
-	if account = c.GetString("account"); account == "" {
-		err = fmt.Errorf("account cant nil")
-		return
+	type LoginParams struct {
+		Account  string `json:"account"`
+		Password string `json:"password"`
 	}
-	if password = c.GetString("password"); password == "" {
-		err = fmt.Errorf("password cant nil")
+	var loginPams LoginParams
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &loginPams); err != nil {
+		err = fmt.Errorf("login body is error")
 		return
 	}
 	var _auth auth.Auth
 	if _auth, err = auth.GetAuthIns(c.Ctx.Input.Param(":authtype")); err != nil {
 		return
 	}
-	if psa, err = _auth.Auth([]string{account, password}...); err != nil || psa == false {
+	if psa, err = _auth.Auth([]string{loginPams.Account, loginPams.Password}...); err != nil || psa == false {
 		return
 	}
-	c.Ctx.Input.CruSession.Set(constant.S_ACCOUNT, account)
+	if manager, err = bridageModels.GetManagerByAccount(loginPams.Account); err != nil {
+		return
+	}
+	c.Ctx.Input.CruSession.Set(constant.S_ACCOUNT, loginPams.Account)
 }
 
 // Register ...

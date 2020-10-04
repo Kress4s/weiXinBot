@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -27,6 +28,7 @@ func GetManagerByAccount(tel string) (ret *Manager, err error) {
 		o.LoadRelated(&v, "Bots")
 		return &v, nil
 	}
+	logs.Error("Get manager by account failed, err is ", err.Error())
 	return nil, err
 }
 

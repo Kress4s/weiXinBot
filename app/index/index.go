@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/common/base"
 	"weiXinBot/app/bridage/constant"
@@ -38,7 +39,7 @@ func (c *IndexController) GetQrCode() {
 		}
 		c.ServeJSON()
 	}()
-	wxID := c.Ctx.Input.Header(constant.H_WXID)
+	wxID := c.GetString(constant.H_WXID)
 	if len(wxID) != 0 {
 		// 登录过
 		if deviceID, err = bridage.GetDeviceIDByWxID(wxID); err != nil {
@@ -46,7 +47,7 @@ func (c *IndexController) GetQrCode() {
 			return
 		}
 	} else {
-		deviceID = c.Ctx.Input.Header(constant.H_DEVID)
+		deviceID = c.GetString(constant.H_DEVID)
 		if len(deviceID) == 0 {
 			err = fmt.Errorf("header[%s] cant be null", constant.H_DEVID)
 			return
@@ -80,51 +81,61 @@ func (c *IndexController) GetQrCode() {
 
 // Check ...
 func (c *IndexController) Check() {
-	var resp *http.Response
-	// var restBody struct {
-	// 	Code    int    `json:"code"`
-	// 	Message string `json:"msg"`
-	// 	Data    struct {
-	// 		Alias      string `json:"alias"`
-	// 		HeadImgURL string `json:"head_image_url"`
-	// 		NickName   string `json:"nick_name"`
-	// 		Token      string `json:"token"`
-	// 		WXID       string `json:"wx_id"`
-	// 	} `json:"data"`
-	// }
-	var restBody *common.StandardRestResult
+	// var resp *http.Response
+	type restQRcode struct {
+		Code    int    `json:"code"`
+		Message string `json:"msg"`
+		Data    struct {
+			Alias      string `json:"alias"`
+			HeadImgURL string `json:"head_image_url"`
+			NickName   string `json:"nick_name"`
+			Token      string `json:"token"`
+			WXID       string `json:"wx_id"`
+		} `json:"data"`
+	}
+	var restBody *restQRcode
 	var err error
-	// deviceID := c.Ctx.Input.CruSession.Get(constant.UUID)
-	UUID := c.Ctx.Input.Header(constant.H_UUID)
+	UUID := c.GetString(constant.H_UUID)
+	qrFlag := c.GetString("flag")
 	defer func() {
 		if err == nil {
 			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: restBody}
 		} else {
 			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 		}
-		// 清除session
-		// c.Ctx.Input.CruSession.Delete(constant.UUID)
 		c.ServeJSON()
 	}()
 	if len(UUID) == 0 {
-		err = fmt.Errorf("get UUID from session failed, err is %s", err.Error())
+		err = fmt.Errorf("uuid is null")
 		return
 	}
-	if resp, err = httplib.Get(constant.LOGIN_CHECK_URL).Param(constant.P_UUID, UUID).DoRequest(); err != nil {
-		logs.Error("get response[%s] failed, err is ", constant.LOGIN_CHECK_URL, err.Error())
-		return
+	for {
+		var resp *http.Response
+		var verr error
+		if resp, verr = httplib.Get(constant.LOGIN_CHECK_URL).Param(constant.P_UUID, UUID).DoRequest(); verr != nil {
+			logs.Error("get response[%s] failed, err is ", constant.LOGIN_CHECK_URL, verr.Error())
+			return
+		}
+		var body []byte
+		if body, verr = ioutil.ReadAll(resp.Body); verr != nil {
+			logs.Error("get URL[%s] body failed, err is ", constant.LOGIN_CHECK_URL, verr.Error())
+			return
+		}
+		if err = json.Unmarshal(body, &restBody); verr != nil {
+			logs.Error("json Unmarshal failed, err is ", verr.Error())
+			return
+		}
+		// 正常
+		if restBody.Code == 0 {
+			if qrFlag == "first" && restBody.Data.Token == "" {
+				break
+			} else if qrFlag == "second" && restBody.Data.Token != "" {
+				break
+			}
+		}
+		// 异常
+		time.Sleep(1 * time.Second)
+		continue
 	}
-	var body []byte
-	if body, err = ioutil.ReadAll(resp.Body); err != nil {
-		logs.Error("get URL[%s] body failed, err is ", constant.LOGIN_CHECK_URL, err.Error())
-		return
-	}
-	if err = json.Unmarshal(body, &restBody); err != nil {
-		logs.Error("json Unmarshal failed, err is ", err.Error())
-		return
-	}
-	// 异常
-	if restBody.Code != 0 {
-		err = fmt.Errorf(restBody.Message)
-	}
+
 }

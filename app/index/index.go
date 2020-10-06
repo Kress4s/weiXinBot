@@ -20,11 +20,6 @@ type IndexController struct {
 	base.BaseController
 }
 
-// Index ...
-func (c *IndexController) Index() {
-	c.TplName = "index.html"
-}
-
 //GetQrCode ...
 /*
 1. header中找微信号(有直接orm设备id)

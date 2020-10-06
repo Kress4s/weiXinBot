@@ -92,10 +92,10 @@ func (j *JWT) RefreshToken(tokenString string) (string, error) {
 }
 
 // CreatCliamIns ...
-func CreatCliamIns(account, password string) (Cusclaiam *CustomClaims) {
-	Cusclaiam = &CustomClaims{
-		Account:  account,
-		PassWord: password,
+func CreatCliamIns(account, password string) (Cusclaiam CustomClaims) {
+	Cusclaiam = CustomClaims{
+		account,
+		password,
 		jwt.StandardClaims{
 			NotBefore: int64(time.Now().Unix() - 1000),
 			ExpiresAt: int64(time.Now().Unix() + 3600),

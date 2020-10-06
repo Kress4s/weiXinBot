@@ -20,7 +20,6 @@ func (c *MgrIndexController) Login() {
 	var psa bool
 	var err error
 	var token string
-	var manager *bridageModels.Manager
 	defer func() {
 		if err == nil {
 			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: token}
@@ -80,7 +79,8 @@ func (c *MgrIndexController) Register() {
 
 // GetMyInfo 获取登录用户详情
 func (c *MgrIndexController) GetMyInfo() {
-	var v, account interface{}
+	var v interface{}
+	var account string
 	var err error
 	defer func() {
 		if err == nil {
@@ -90,9 +90,9 @@ func (c *MgrIndexController) GetMyInfo() {
 		}
 		c.ServeJSON()
 	}()
-	if account = c.Ctx.Input.CruSession.Get(constant.S_ACCOUNT); account == nil {
-		err = fmt.Errorf("get account from session failed")
+	if account = c.GetString(constant.S_ACCOUNT); account == "" {
+		err = fmt.Errorf("account is nil")
 		return
 	}
-	v, err = bridageModels.GetManagerByAccount(account.(string))
+	v, err = bridageModels.GetManagerByAccount(account)
 }

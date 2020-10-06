@@ -131,7 +131,7 @@ func GetAllBots(querys []*common.QueryConditon, fields []string, sortby []string
 	var l []bridageModels.Bots
 	qs = qs.OrderBy(sortFields...).RelatedSel()
 	// add IsDelete filter
-	if _, err = qs.Limit(limit, offset).Filter("IsDeleted", false).All(&l, fields...); err == nil {
+	if _, err = qs.Limit(limit, offset-1).Filter("IsDeleted", false).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
 				ml = append(ml, v)

@@ -2,8 +2,10 @@ package models
 
 // AutoKick ...
 type AutoKick struct {
-	ID     int64 `orm:"auto;column(id)"`           //
-	Switch bool  `orm:"column(switch);default(1)"` //功能总开关
+	ID        int64      `orm:"auto;column(id)"`           //
+	Type      int        `orm:"column(type);default(3)"`   // 所属功能类型 （默认3）
+	Switch    bool       `orm:"column(switch);default(1)"` //功能总开关
+	GroupPlan *GroupPlan `orm:"rel(fk)"`                   //
 }
 
 // KickOnly 仅踢人

@@ -10,22 +10,23 @@ import (
 // Bots ...
 type Bots struct {
 	ID             int64      `orm:"auto;column(id)"`
-	WXID           string     `orm:"size(200);column(wx_id)" json:"id"`
-	BigHeadImage   string     `orm:"size(200);column(big_head_img_url)" json:"big_head_img_url"`
-	SmallHeadImage string     `orm:"size(200);column(small_head_img_url)" json:"small_head_img_url"`
-	NickName       string     `orm:"size(50);column(nick_name)" json:"nick_name"`
-	Country        string     `orm:"size(50);column(country)" json:"country"`
-	Province       string     `orm:"size(50);column(province)" json:"province"`
-	City           string     `orm:"size(50);column(city)" json:"city"`
-	Sex            bool       `orm:"column(sex)" json:"sex"`
-	Signature      string     `orm:"size(50);column(signature)" json:"signature"`
-	Alias          string     `orm:"size(50);column(alias)" json:"alias"`
-	Device         string     `orm:"size(50);column(device)" json:"device"`
-	LoginStatus    int        `orm:"column(login_status)" json:"login_status"` // 机器人登录状态
-	Status         int        `orm:"column(status)" json:"status"`             // 机器人状态
-	ExpireTime     time.Time  `orm:"type(datetime);column(expiretime)"`        // 到期时间
-	Token          string     `orm:"size(50);column(token)"`                   // Token
-	IsDeleted      bool       `orm:"column(is_deleted); default(0)"`           //逻辑删除字段
+	WXID           string     `orm:"size(200);column(wx_id);unique"`
+	BigHeadImage   string     `orm:"size(200);column(big_head_img_url)"`
+	SmallHeadImage string     `orm:"size(200);column(small_head_img_url)"`
+	NickName       string     `orm:"size(50);column(nick_name)"`
+	Country        string     `orm:"size(50);column(country)"`
+	City           string     `orm:"size(50);column(city)" `
+	Sex            bool       `orm:"column(sex)"`
+	Signature      string     `orm:"size(50);column(signature)"`
+	Alias          string     `orm:"size(50);column(alias)"`
+	Device         string     `orm:"size(50);column(device)"`
+	LoginStatus    int        `orm:"column(login_status)"`                            // 机器人登录状态
+	Status         int        `orm:"column(status)"`                                  // 机器人状态
+	LoginTime      time.Time  `orm:"auto_now;column(login_time);type(datetime)"`      //
+	CreateTime     time.Time  `orm:"auto_now_add;column(create_time);type(datetime)"` //
+	ExpireTime     time.Time  `orm:"type(datetime);column(expiretime);null"`          // 到期时间
+	Token          string     `orm:"size(50);column(token)"`                          // Token
+	IsDeleted      bool       `orm:"column(is_deleted); default(0)"`                  //逻辑删除字段
 	Manager        *Manager   `orm:"rel(fk)"`
 	Contacts       []*Contact `orm:"reverse(many)"` //好友
 	Groups         []*Group   `orm:"reverse(many)"`

@@ -28,6 +28,16 @@ func GetWelcomeByID(id int64) (v *bridageModels.Welcome, err error) {
 	return v, nil
 }
 
+// GetWelcomeByTypeAndPlan ...
+func GetWelcomeByTypeAndPlan(planID, typeID int64) (v *bridageModels.Welcome, err error) {
+	o := orm.NewOrm()
+	if err := o.QueryTable(new(bridageModels.Welcome)).Filter("Type", typeID).Filter("GroupPlan__ID", planID).One(&v); err != nil {
+		logs.Error("GetWelcomeByTypeAndPlan failed, err is ", err.Error())
+		return nil, err
+	}
+	return v, nil
+}
+
 // GetAllWelcome get all bots
 func GetAllWelcome(querys []*common.QueryConditon, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, totalcount int64, err error) {

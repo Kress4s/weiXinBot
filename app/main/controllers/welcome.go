@@ -63,6 +63,26 @@ func (c *WelcomeController) GetOne() {
 	v, err = models.GetWelcomeByID(id)
 }
 
+// GetOneWelcome 根据类别和planid获取具体入群欢迎语
+// @router /category [get]
+func (c *WelcomeController) GetOneWelcome() {
+	var v *bridageModels.Welcome
+	var err error
+	typeStr := c.GetString("type")
+	typeID, _ := strconv.ParseInt(typeStr, 0, 64)
+	planIDStr := c.Ctx.Input.Param("planid")
+	planID, _ := strconv.ParseInt(planIDStr, 0, 64)
+	defer func() {
+		if err == nil {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		} else {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		}
+		c.ServeJSON()
+	}()
+	v, err = models.GetWelcomeByTypeAndPlan(planID, typeID)
+}
+
 // GetAll ...
 // @Title Get All
 // @Description get Welcome

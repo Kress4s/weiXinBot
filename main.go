@@ -26,7 +26,7 @@ func main() {
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "X-Token", "DeviceID", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		AllowHeaders:     []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type", "Cookie"},
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
@@ -35,7 +35,8 @@ func main() {
 	//设置日志规则
 	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"logs/beta.log","separate":["error", "warning", "notice", "info", "debug"]}`)
 	logs.EnableFuncCallDepth(true)
-	beego.AddViewPath("template")
+	beego.SetStaticPath("/", "./static")
+	// beego.AddViewPath("template")
 	args := os.Args //获取用户输入的所有参数
 	if args == nil || len(args) < 2 {
 		//如果用户没有输入,或参数个数不够,则调用该函数提示用户

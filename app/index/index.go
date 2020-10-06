@@ -20,6 +20,11 @@ type IndexController struct {
 	base.BaseController
 }
 
+// Index ...
+func (c *IndexController) Index() {
+	c.TplName = "index.html"
+}
+
 //GetQrCode ...
 /*
 1. header中找微信号(有直接orm设备id)
@@ -82,6 +87,7 @@ func (c *IndexController) GetQrCode() {
 // Check ...
 func (c *IndexController) Check() {
 	// var resp *http.Response
+	var timeout int
 	type restQRcode struct {
 		Code    int    `json:"code"`
 		Message string `json:"msg"`
@@ -135,7 +141,10 @@ func (c *IndexController) Check() {
 		}
 		// 异常
 		time.Sleep(1 * time.Second)
+		if timeout == 30 {
+			break
+		}
+		timeout++
 		continue
 	}
-
 }

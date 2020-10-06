@@ -234,6 +234,15 @@ func init() {
 
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:WelcomeController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:WelcomeController"],
         beego.ControllerComments{
+            Method: "GetOneWelcome",
+            Router: `/category`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:WelcomeController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:WelcomeController"],
+        beego.ControllerComments{
             Method: "DeleteList",
             Router: `/deletelist`,
             AllowHTTPMethods: []string{"delete"},

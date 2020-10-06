@@ -10,6 +10,7 @@ import (
 func init() {
 	beego.Router("/index/login/qr_code", &index.IndexController{}, "get:GetQrCode")
 	beego.Router("/index/login/check", &index.IndexController{}, "get:Check")
+	beego.Router("/home", &index.IndexController{}, "get:Index")
 	beego.Router("/manager/login/?:authtype", &index.MgrIndexController{}, "post:Login")
 	beego.Router("/manager/register", &index.MgrIndexController{}, "post:Register")
 	beego.Router("/manager/getmyinfo", &index.MgrIndexController{}, "get:GetMyInfo")

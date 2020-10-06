@@ -19,10 +19,11 @@ type MgrIndexController struct {
 func (c *MgrIndexController) Login() {
 	var psa bool
 	var err error
+	var token string
 	var manager *bridageModels.Manager
 	defer func() {
 		if err == nil {
-			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: manager}
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: token}
 		} else {
 			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 		}
@@ -44,10 +45,13 @@ func (c *MgrIndexController) Login() {
 	if psa, err = _auth.Auth([]string{loginPams.Account, loginPams.Password}...); err != nil || psa == false {
 		return
 	}
-	if manager, err = bridageModels.GetManagerByAccount(loginPams.Account); err != nil {
-		return
-	}
-	c.Ctx.Input.CruSession.Set(constant.S_ACCOUNT, loginPams.Account)
+	// if manager, err = bridageModels.GetManagerByAccount(loginPams.Account); err != nil {
+	// 	return
+	// }
+	jwt := common.NewJWT()
+	myClaim := common.CreatCliamIns(loginPams.Account, loginPams.Password)
+	token, err = jwt.CreateToken(myClaim)
+	// c.Ctx.Input.CruSession.Set(constant.S_ACCOUNT, loginPams.Account)
 }
 
 // Register ...

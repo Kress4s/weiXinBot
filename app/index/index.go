@@ -92,12 +92,13 @@ func (c *IndexController) Check() {
 			NickName   string `json:"nick_name"`
 			Token      string `json:"token"`
 			WXID       string `json:"wx_id"`
+			Status     string `json:"status"`
 		} `json:"data"`
 	}
 	var restBody *restQRcode
 	var err error
 	UUID := c.GetString(constant.H_UUID)
-	qrFlag := c.GetString("flag")
+	// qrFlag := c.GetString("flag")
 	defer func() {
 		if err == nil {
 			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: restBody}
@@ -127,12 +128,10 @@ func (c *IndexController) Check() {
 			return
 		}
 		// 正常
-		if restBody.Code == 0 {
-			if qrFlag == "first" && restBody.Data.Token == "" {
-				break
-			} else if qrFlag == "second" && restBody.Data.Token != "" {
-				break
-			}
+		if restBody.Code == 0 && restBody.Data.Status == "Scanned" {
+			break
+		} else if restBody.Code == 0 && restBody.Data.Status == "Scanned" {
+			break
 		}
 		// 异常
 		time.Sleep(1 * time.Second)

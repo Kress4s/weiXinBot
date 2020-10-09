@@ -15,12 +15,14 @@ import (
 
 func main() {
 	// var checkAcess = func(ctx *context.Context) {
-	// 	if ctx.Input.Header("Authorization") == "" {
-	// 		ctx.ResponseWriter.WriteHeader(constant.EXPEIRE_ACCOUNT_CODE)
+	// 	if token := ctx.Input.Header("Authorization"); token != "" {
+	// 		fmt.Println(ctx.Input.URL())
+	// 		// ctx.ResponseWriter.WriteHeader(constant.EXPEIRE_ACCOUNT_CODE)
+	// 		fmt.Println(token)
 	// 	}
 	// }
 	// 接口认证(调试阶段屏蔽)
-	// beego.InsertFilter("*", beego.BeforeRouter, checkAcess)
+	// beego.InsertFilter("^(?!.*/manager)", beego.BeforeRouter, checkAcess)
 
 	//允许跨站访问
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{

@@ -98,7 +98,7 @@ func (c *IndexController) Check() {
 	var restBody *restQRcode
 	var err error
 	UUID := c.GetString(constant.H_UUID)
-	// qrFlag := c.GetString("flag")
+	qrFlag := c.GetString("flag")
 	defer func() {
 		if err == nil {
 			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: restBody}
@@ -128,9 +128,9 @@ func (c *IndexController) Check() {
 			return
 		}
 		// 正常
-		if restBody.Code == 0 && restBody.Data.Status == "Scanned" {
+		if restBody.Code == 0 && qrFlag == "first" && restBody.Data.Status == "Scanned" {
 			break
-		} else if restBody.Code == 0 && restBody.Data.Status == "Scanned" {
+		} else if restBody.Code == 0 && qrFlag == "second" && restBody.Data.Status == "Confirmed" {
 			break
 		}
 		// 异常

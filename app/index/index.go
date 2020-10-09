@@ -132,6 +132,9 @@ func (c *IndexController) Check() {
 			break
 		} else if restBody.Code == 0 && qrFlag == "second" && restBody.Data.Status == "Confirmed" {
 			break
+		} else if qrFlag == "cancel" {
+			restBody = nil
+			break
 		}
 		// 异常
 		time.Sleep(1 * time.Second)

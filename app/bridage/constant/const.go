@@ -11,6 +11,7 @@ const (
 	H_WXID          = "wx_id"         //微信ID
 	H_DEVID         = "DeviceID"      //设备ID
 	H_UUID          = "UUID"          //变化的
+	H_TOKEN_KEY     = "WX_TOKEN"      // 给协议顶层的token
 )
 
 // params
@@ -21,10 +22,9 @@ const (
 
 // session
 const (
-	S_TOKEN_KEY = "WX_TOKEN"
-	S_WX_ID     = "WX_ID"
-	S_UUID      = "uuid"
-	S_ACCOUNT   = "account"
+	S_WX_ID   = "WX_ID"
+	S_UUID    = "uuid"
+	S_ACCOUNT = "account"
 )
 
 const (

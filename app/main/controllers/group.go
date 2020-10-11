@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/common/base"
+	"weiXinBot/app/bridage/constant"
 	bridageModels "weiXinBot/app/bridage/models"
 	"weiXinBot/app/main/models"
 )
@@ -59,4 +60,21 @@ func (c *GroupController) GetOne() {
 	}()
 	fmt.Println(gid)
 	v, err = models.GetGroupByGID(gid)
+}
+
+// GetGroupFromProto ...
+// @router /groupfromproto [get]
+func (c *GroupController) GetGroupFromProto() {
+	var v interface{}
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		}
+		c.ServeJSON()
+	}()
+	Authorization := c.Ctx.Input.Header(constant.H_TOKEN_KEY)
+	v, err = bridageModels.ProtoGiveGroup(Authorization)
 }

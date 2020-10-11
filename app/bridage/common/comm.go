@@ -14,6 +14,31 @@ type StandardRestResult struct {
 	Data    interface{} `json:"data"`
 }
 
+// 从协议获取群ID列表数据结构
+type RecieveGroupList struct {
+	Code int `json:"code"`
+	Data struct {
+		CurrentWxContactSeq       int      `json:"current_wx_contact_seq"`
+		CurrentChatRoomContactSeq int      `json:"current_chat_room_contact_seq"`
+		IDs                       []string `json:"ids"`
+	} `json:"data"`
+}
+
+// 从协议获取群详细信息的数据结构
+type DetailGroupInfo struct {
+	ID                string `json:"id"`
+	NickName          string `json:"nick_name"`
+	AliasName         string `json:"alias_name"`
+	Sex               int    `json:"sex"`
+	Country           string `json:"country"`
+	Province          string `json:"province"`
+	City              string `json:"city"`
+	Signature         string `json:"signature"`
+	HeadBigImageURL   string `json:"head_big_image_url"`
+	HeadSmallImageURL string `json:"head_small_image_url"`
+	Label             string `json:"label"`
+}
+
 // 查询条件常量
 const (
 	MultiSelect      = "multi-select"       // 多选

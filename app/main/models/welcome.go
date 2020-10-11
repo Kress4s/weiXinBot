@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"weiXinBot/app/bridage/common"
@@ -29,9 +30,11 @@ func GetWelcomeByID(id int64) (v *bridageModels.Welcome, err error) {
 }
 
 // GetWelcomeByTypeAndPlan ...
-func GetWelcomeByTypeAndPlan(planID, typeID int64) (v *bridageModels.Welcome, err error) {
+func GetWelcomeByTypeAndPlan(planID int64, typeID int) (v *bridageModels.Welcome, err error) {
 	o := orm.NewOrm()
-	if err := o.QueryTable(new(bridageModels.Welcome)).Filter("Type", typeID).Filter("GroupPlan__ID", planID).One(&v); err != nil {
+	fmt.Println(planID, typeID)
+	v = &bridageModels.Welcome{Type: typeID}
+	if err := o.QueryTable(new(bridageModels.Welcome)).Filter("Type", typeID).Filter("GroupPlan__ID", planID).One(v); err != nil {
 		logs.Error("GetWelcomeByTypeAndPlan failed, err is ", err.Error())
 		return nil, err
 	}

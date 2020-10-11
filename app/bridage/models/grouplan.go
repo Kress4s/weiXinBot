@@ -10,6 +10,14 @@ type GroupPlan struct {
 	Groups  []*Group `orm:"reverse(many)"`         //
 }
 
+// TableUnique ...
+// 多字段唯一键
+func (u *GroupPlan) TableUnique() [][]string {
+	return [][]string{
+		[]string{"Name", "Manager"},
+	}
+}
+
 func init() {
 	orm.RegisterModel(new(GroupPlan))
 }

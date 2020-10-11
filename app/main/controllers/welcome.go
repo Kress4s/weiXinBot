@@ -69,8 +69,8 @@ func (c *WelcomeController) GetOneWelcome() {
 	var v *bridageModels.Welcome
 	var err error
 	typeStr := c.GetString("type")
-	typeID, _ := strconv.ParseInt(typeStr, 0, 64)
-	planIDStr := c.Ctx.Input.Param("planid")
+	typeID, _ := strconv.Atoi(typeStr)
+	planIDStr := c.GetString("planid")
 	planID, _ := strconv.ParseInt(planIDStr, 0, 64)
 	defer func() {
 		if err == nil {

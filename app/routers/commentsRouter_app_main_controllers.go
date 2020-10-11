@@ -142,6 +142,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"],
+        beego.ControllerComments{
+            Method: "GetGroupFromProto",
+            Router: "/groupfromproto",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:MaterialController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:MaterialController"],
         beego.ControllerComments{
             Method: "Post",

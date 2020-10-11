@@ -11,20 +11,20 @@ import (
 	"weiXinBot/app/main/models"
 )
 
-// GrouPlanController ...
-type GrouPlanController struct {
+// MaterialController ...
+type MaterialController struct {
 	base.BaseController
 }
 
 // Post ...
 // @Title Post
-// @Description create GrouPlan
-// @Param	body		body 	models.GrouPlan	true		"body for Bots content"
-// @Success 201 {int} models.GrouPlan
+// @Description create Material
+// @Param	body		body 	models.Material	true		"body for Bots content"
+// @Success 201 {int} models.Material
 // @Failure 403 body is empty
 // @router / [post]
-func (c *GrouPlanController) Post() {
-	var v *bridageModels.GroupPlan
+func (c *MaterialController) Post() {
+	var v *bridageModels.Material
 	var err error
 	defer func() {
 		if err == nil {
@@ -37,18 +37,18 @@ func (c *GrouPlanController) Post() {
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return
 	}
-	_, err = models.AddGrouplan(v)
+	_, err = models.AddMaterial(v)
 }
 
 // GetOne ...
 // @Title Get One
-// @Description get GrouPlan by id
+// @Description get Material by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.GrouPlan
+// @Success 200 {object} models.Material
 // @Failure 403 :id is empty
 // @router /:id [get]
-func (c *GrouPlanController) GetOne() {
-	var v *bridageModels.GroupPlan
+func (c *MaterialController) GetOne() {
+	var v *bridageModels.Material
 	var err error
 	idstr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idstr, 0, 64)
@@ -60,22 +60,22 @@ func (c *GrouPlanController) GetOne() {
 		}
 		c.ServeJSON()
 	}()
-	v, err = models.GetGouplanByID(id)
+	v, err = models.GetMaterialByID(id)
 }
 
 // GetAll ...
 // @Title Get All
-// @Description get GrouPlan
+// @Description get Material
 // @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
 // @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
 // @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.GrouPlan
+// @Success 200 {object} models.Material
 // @Failure 403
 // @router / [get]
-func (c *GrouPlanController) GetAll() {
+func (c *MaterialController) GetAll() {
 	var fields []string
 	var sortby []string
 	var order []string
@@ -131,7 +131,7 @@ func (c *GrouPlanController) GetAll() {
 			query = append(query, qcondtion)
 		}
 	}
-	l, count, err := models.GetAllGrouplan(query, fields, sortby, order, offset, limit)
+	l, count, err := models.GetAllMaterial(query, fields, sortby, order, offset, limit)
 	if err != nil {
 		c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 	} else {
@@ -148,7 +148,7 @@ func (c *GrouPlanController) GetAll() {
 
 // Put ...
 // @router /:id [put]
-func (c *GrouPlanController) Put() {
+func (c *MaterialController) Put() {
 	var err error
 	defer func() {
 		if err != nil {
@@ -160,16 +160,16 @@ func (c *GrouPlanController) Put() {
 	}()
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idStr, 0, 64)
-	var v = bridageModels.GroupPlan{ID: id}
+	var v = bridageModels.Material{ID: id}
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return
 	}
-	err = models.UpdateGrouplanByID(&v)
+	err = models.UpdateMaterialByID(&v)
 }
 
 // Delete ...
 // @router /:id [delete]
-func (c *GrouPlanController) Delete() {
+func (c *MaterialController) Delete() {
 	var err error
 	defer func() {
 		if err != nil {
@@ -181,12 +181,12 @@ func (c *GrouPlanController) Delete() {
 	}()
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idStr, 0, 64)
-	err = models.DeleteGrouplanByID(id)
+	err = models.DeleteMaterialByID(id)
 }
 
 // DeleteList ...
 // @router /deletelist [delete]
-func (c *GrouPlanController) DeleteList() {
+func (c *MaterialController) DeleteList() {
 	var idslice []interface{}
 	if ids := c.GetString("ids"); ids != "" {
 		s := strings.Split(ids, ",")
@@ -194,28 +194,10 @@ func (c *GrouPlanController) DeleteList() {
 			idslice = append(idslice, v)
 		}
 	}
-	if err := models.MultiDeleteGrouplanByIDs(idslice); err == nil {
+	if err := models.MultiDeleteMaterialByIDs(idslice); err == nil {
 		c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
 	} else {
 		c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 	}
 	c.ServeJSON()
-}
-
-// GetPlanFuncSwitch ...
-// @router /getswitchs/:id [get]
-func (c *GrouPlanController) GetPlanFuncSwitch() {
-	var v interface{}
-	var err error
-	defer func() {
-		if err != nil {
-			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
-		} else {
-			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
-		}
-		c.ServeJSON()
-	}()
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
-	v, err = bridageModels.GetGrouPlanFuncSwitch(id)
 }

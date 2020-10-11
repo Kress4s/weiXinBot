@@ -13,7 +13,7 @@ type Welcome struct {
 	WaitTimeSwitch      bool       `orm:"column(wait_time_switch);default(1)"`       // 进群多少秒发送
 	NewerNum            int        `orm:"column(newernum)"`                          //新进到多少人发送
 	WaitNewersNumSwitch bool       `orm:"column(wait_newers_num_switch);default(1)"` // 新进群多少人发送开关
-	Resources           string     `orm:"size(300); column(resouces)"`               // 来自资源库的具体回复内容(ids, ","连接,有多个)
+	Resources           string     `orm:"size(300); column(resouces)"`               // 来自资源库的具体回复内容(ids, ","连接,有多个,有素材库导入)
 	GroupPlan           *GroupPlan `orm:"rel(fk)"`                                   //
 }
 

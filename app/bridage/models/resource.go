@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -23,4 +26,23 @@ type Material struct {
 
 func init() {
 	orm.RegisterModel(new(Resource), new(Material))
+}
+
+// GetResourceByIds 根据resource的多个id或许资源信息
+func GetResourceByIds(resourceIds string) (ret []*Resource, err error) {
+	if len(resourceIds) == 0 {
+		err := fmt.Errorf("GetResourceByIds ids cant be null")
+		return nil, err
+	}
+	o := orm.NewOrm()
+	var resources []*Resource
+	if _, err = o.Raw("select * from resource where ? like concat(id, ',%')"+"or ? like concat('%,', id)"+
+		"or ? like concat('%,', id, ',%')"+"or ? = id", resourceIds, resourceIds, resourceIds, resourceIds).QueryRows(&resources); err != nil {
+		logs.Error("Get Resource By Ids failed, err is ", err.Error())
+		return nil, err
+	}
+	for _, r := range resources {
+		o.LoadRelated(r, "Material")
+	}
+	return resources, nil
 }

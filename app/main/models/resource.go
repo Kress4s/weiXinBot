@@ -14,7 +14,14 @@ import (
 // AddResource ...
 func AddResource(resource *bridageModels.Resource) (id int64, err error) {
 	o := orm.NewOrm()
-	id, err = o.Insert(resource)
+	if id, err = o.Insert(resource); err != nil {
+		return 0, err
+	}
+	// 资源子素材插入
+	for _, _v := range resource.Material {
+		_v.Resource = resource
+		o.Insert(_v)
+	}
 	return
 }
 

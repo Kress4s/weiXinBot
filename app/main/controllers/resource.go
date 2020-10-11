@@ -28,7 +28,7 @@ func (c *ResouceController) Post() {
 	var err error
 	defer func() {
 		if err == nil {
-			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v.ID}
 		} else {
 			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 		}
@@ -37,7 +37,8 @@ func (c *ResouceController) Post() {
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return
 	}
-	_, err = models.AddResource(v)
+	// 返回id让welcome资源ids记录
+	v.ID, err = models.AddResource(v)
 }
 
 // GetOne ...
@@ -200,4 +201,21 @@ func (c *ResouceController) DeleteList() {
 		c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 	}
 	c.ServeJSON()
+}
+
+// GetAllResourceByIds ...
+// @router /getResourcesByIds [get]
+func (c *ResouceController) GetAllResourceByIds() {
+	var ret interface{}
+	var err error
+	Ids := c.GetString("ids")
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: ret}
+		}
+		c.ServeJSON()
+	}()
+	ret, err = bridageModels.GetResourceByIds(Ids)
 }

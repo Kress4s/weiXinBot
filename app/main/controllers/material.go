@@ -24,7 +24,11 @@ type MaterialController struct {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *MaterialController) Post() {
-	var v *bridageModels.Material
+	type Materials struct {
+		Data []*bridageModels.Material `json:"Data"`
+	}
+	var vs []*bridageModels.Material
+	var v *Materials
 	var err error
 	defer func() {
 		if err == nil {
@@ -37,7 +41,10 @@ func (c *MaterialController) Post() {
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return
 	}
-	_, err = models.AddMaterial(v)
+	for _, _v := range v.Data {
+		vs = append(vs, _v)
+	}
+	_, err = models.AddMaterial(vs)
 }
 
 // GetOne ...

@@ -19,7 +19,7 @@ type Resource struct {
 // Material 单个素材类型
 type Material struct {
 	ID       int64     `orm:"auto;column(id)"`         //
-	Type     int       `orm:"column(type)"`            //消息内容类型(0:文本 1:图片....)
+	Type     int       `orm:"column(type)"`            //消息内容类型(1:文本 2:图片....)
 	Data     string    `orm:"size(300); column(data)"` //类型的具体内容(后期可拆)
 	Resource *Resource `orm:"rel(fk)"`                 //所属素材组
 }

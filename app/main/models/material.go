@@ -12,9 +12,13 @@ import (
 )
 
 // AddMaterial ...
-func AddMaterial(material *bridageModels.Material) (id int64, err error) {
+func AddMaterial(materials []*bridageModels.Material) (id int64, err error) {
 	o := orm.NewOrm()
-	id, err = o.Insert(material)
+	for _, material := range materials {
+		if id, err = o.Insert(material); err != nil {
+			return 0, err
+		}
+	}
 	return
 }
 

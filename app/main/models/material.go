@@ -167,6 +167,21 @@ func UpdateMaterialByID(m *bridageModels.Material) (err error) {
 	return
 }
 
+// MultiUpdateMaterial ...
+func MultiUpdateMaterial(ms []*bridageModels.Material) (err error) {
+	for _, m := range ms {
+		var v = bridageModels.Material{ID: m.ID}
+		o := orm.NewOrm()
+		if err = o.Read(&v); err == nil {
+			var num int64
+			if num, err = o.Update(m); err == nil {
+				logs.Debug("Number of Bot update in database:", num)
+			}
+		}
+	}
+	return
+}
+
 // DeleteMaterialByID deletes Material by Id and returns error if
 // the record to be deleted doesn't exist
 func DeleteMaterialByID(id int64) (err error) {

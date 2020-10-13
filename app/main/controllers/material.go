@@ -174,6 +174,32 @@ func (c *MaterialController) Put() {
 	err = models.UpdateMaterialByID(&v)
 }
 
+// MutilPut ...
+// @router /updatelist [put]
+func (c *MaterialController) MutilPut() {
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	type Materials struct {
+		Data []*bridageModels.Material `json:"Data"`
+	}
+	var vs []*bridageModels.Material
+	var v *Materials
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
+		return
+	}
+	for _, _v := range v.Data {
+		vs = append(vs, _v)
+	}
+	err = models.MultiUpdateMaterial(vs)
+}
+
 // Delete ...
 // @router /:id [delete]
 func (c *MaterialController) Delete() {

@@ -22,10 +22,10 @@ func AddGrouplan(grouplan *bridageModels.GroupPlan) (id int64, err error) {
 func GetGouplanByID(id int64) (v *bridageModels.GroupPlan, err error) {
 	o := orm.NewOrm()
 	v = &bridageModels.GroupPlan{ID: id}
-	if err = o.Read(v); err != nil {
-		o.LoadRelated(v, "Groups")
+	if err = o.QueryTable(new(bridageModels.GroupPlan)).Filter("ID", id).One(v); err != nil {
 		return nil, err
 	}
+	o.LoadRelated(v, "Groups")
 	return v, nil
 }
 

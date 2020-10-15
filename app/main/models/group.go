@@ -13,6 +13,15 @@ func AddGroup(m *bridageModels.Group) (id int64, err error) {
 	return
 }
 
+//MultiAddGroup ...
+func MultiAddGroup(m []*bridageModels.Group) (err error) {
+	o := orm.NewOrm()
+	for _, _m := range m {
+		_, err = o.Insert(_m)
+	}
+	return
+}
+
 // GetGroupByGID ...
 func GetGroupByGID(GID string) (v *bridageModels.Group, err error) {
 	o := orm.NewOrm()

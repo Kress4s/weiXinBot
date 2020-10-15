@@ -39,6 +39,28 @@ func (c *GroupController) Post() {
 	_, err = models.AddGroup(v)
 }
 
+// MultiPost ...
+// @router /multi [post]
+func (c *GroupController) MultiPost() {
+	type Groups struct {
+		Data []*bridageModels.Group `json:"data"`
+	}
+	var v Groups
+	var err error
+	defer func() {
+		if err == nil {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		} else {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		}
+		c.ServeJSON()
+	}()
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
+		return
+	}
+	err = models.MultiAddGroup(v.Data)
+}
+
 // GetOne ...
 // @Title Get One
 // @Description get Group by id

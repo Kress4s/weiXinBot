@@ -12,11 +12,11 @@ type GroupPlan struct {
 
 // TableUnique ...
 // 多字段唯一键
-// func (u *GroupPlan) TableUnique() [][]string {
-// 	return [][]string{
-// 		[]string{"Name", "Manager"},
-// 	}
-// }
+func (u *GroupPlan) TableUnique() [][]string {
+	return [][]string{
+		{"Name", "Manager"},
+	}
+}
 
 func init() {
 	orm.RegisterModel(new(GroupPlan))

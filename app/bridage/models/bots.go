@@ -36,7 +36,7 @@ type Bots struct {
 // 多字段索引
 func (u *Bots) TableIndex() [][]string {
 	return [][]string{
-		[]string{"Id", "WXID"},
+		{"Id", "WXID"},
 	}
 }
 

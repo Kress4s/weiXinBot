@@ -3,6 +3,7 @@ package models
 import (
 	bridageModels "weiXinBot/app/bridage/models"
 
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -30,4 +31,17 @@ func GetGroupByGID(GID string) (v *bridageModels.Group, err error) {
 		return nil, err
 	}
 	return v, nil
+}
+
+// UpdateGrouByID ...
+func UpdateGrouByID(m *bridageModels.Group) (err error) {
+	var v = bridageModels.Group{GID: m.GID}
+	o := orm.NewOrm()
+	if err = o.Read(&v); err == nil {
+		var num int64
+		if num, err = o.Update(m, "IsNeedServe", "GroupPlan"); err == nil {
+			logs.Debug("Number of Bot update in database:", num)
+		}
+	}
+	return
 }

@@ -100,3 +100,23 @@ func (c *GroupController) GetGroupFromProto() {
 	Authorization := c.Ctx.Input.Header(constant.H_TOKEN_KEY)
 	v, err = bridageModels.ProtoGiveGroup(Authorization)
 }
+
+// Put ...
+// @router /:gid [put]
+func (c *GroupController) Put() {
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	gid := c.Ctx.Input.Param(":gid")
+	var v = bridageModels.Group{GID: gid}
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
+		return
+	}
+	err = models.UpdateGrouByID(&v)
+}

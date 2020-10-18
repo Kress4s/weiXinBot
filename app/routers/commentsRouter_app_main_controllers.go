@@ -160,6 +160,69 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "Delete",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "GetOneKeyWord",
+            Router: "/category",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
+        beego.ControllerComments{
+            Method: "DeleteList",
+            Router: "/deletelist",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:MaterialController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:MaterialController"],
         beego.ControllerComments{
             Method: "Post",
@@ -219,6 +282,60 @@ func init() {
             Method: "MutilPut",
             Router: "/updatelist",
             AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"],
+        beego.ControllerComments{
+            Method: "Delete",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:QuestionController"],
+        beego.ControllerComments{
+            Method: "DeleteList",
+            Router: "/deletelist",
+            AllowHTTPMethods: []string{"delete"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

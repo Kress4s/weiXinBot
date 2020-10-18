@@ -33,6 +33,12 @@ func init() {
 		beego.NSNamespace("/material",
 			beego.NSInclude(&controllers.MaterialController{}),
 		),
+		beego.NSNamespace("/keyword",
+			beego.NSInclude(&controllers.KeyWordsController{}),
+		),
+		beego.NSNamespace("/question",
+			beego.NSInclude(&controllers.QuestionController{}),
+		),
 	)
 	beego.AddNamespace(ns1)
 }

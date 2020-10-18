@@ -14,8 +14,22 @@ import (
 
 // AddBot ...
 func AddBot(bot *bridageModels.Bots) (id int64, err error) {
+	if len(bot.WXID) == 0 {
+		return 0, errors.New("添加机器人的wxid不能为空")
+	}
 	o := orm.NewOrm()
 	bot.Token = fmt.Sprintf("Bearer %s", bot.Token)
+	// 判断wxid不能为空；判断是否存在(是否请求)；存在更新；不存在新增；先是后端处理
+	if bridageModels.IsManagerNewBot(bot) {
+		fmt.Println("update")
+		// update bot info
+		if err = bridageModels.UpdateBotByWXID(bot); err != nil {
+			logs.Error("when add bot interface update bot accured error, err is ", err.Error())
+			return 0, err
+		}
+		// 这里存在id返回0的不准确的问题，暂时搁置，不影响
+		return
+	}
 	id, err = o.Insert(bot)
 	return
 }

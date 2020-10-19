@@ -12,9 +12,9 @@ import (
 )
 
 // AddKeyWord ...
-func AddKeyWord(grouplan *bridageModels.KeyWords) (id int64, err error) {
+func AddKeyWord(keyword *bridageModels.KeyWords) (id int64, err error) {
 	o := orm.NewOrm()
-	id, err = o.Insert(grouplan)
+	id, err = o.Insert(keyword)
 	return
 }
 

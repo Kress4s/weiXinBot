@@ -47,6 +47,7 @@ func main() {
 	} else if len(args) == 2 {
 		switch args[1] {
 		case "start":
+			//runtime.GOMAXPROCS(runtime.NumCPU()) // 预置运行规格协程信息
 			beego.Run()
 		case "orm":
 			orm.RunCommand()

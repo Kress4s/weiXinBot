@@ -39,6 +39,9 @@ func init() {
 		beego.NSNamespace("/question",
 			beego.NSInclude(&controllers.QuestionController{}),
 		),
+		beego.NSNamespace("/config",
+			beego.NSInclude(&controllers.ConfigurationController{}),
+		),
 	)
 	beego.AddNamespace(ns1)
 }

@@ -81,6 +81,13 @@ const (
 	LABEL_LIST_UPDATE_URL = BASE_URL + "/label/update/list"
 )
 
+// Send Message
+const (
+	SEND_TEXT  = BASE_URL + "/message/send/text"
+	SEND_IMAGE = BASE_URL + "/message/send/image"
+	SEND_VIDEO = BASE_URL + "/message/send/video"
+)
+
 // sns
 const ()
 

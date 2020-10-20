@@ -78,3 +78,16 @@ func MultiDeleteExactWordByIDs(ids string) (err error) {
 	}
 	return err
 }
+
+// KeyWordsService ...
+// @Params  keyContent: "push_content":"🛫张 : G吐总冠军"
+func KeyWordsService(keyContent string) (isNeedReply bool, replyContent []interface{}) {
+	/*
+		1. 判断开关
+		2. 查找精准
+		3. 匹配模糊
+		4. 是否@; 是否attach上问题
+		5. 返回回复内容
+	*/
+	return
+}

@@ -86,3 +86,14 @@ func IsManagerNewBot(m *Bots) (isExist bool) {
 	}
 	return true
 }
+
+// GetBotByWXID ...
+func GetBotByWXID(WXID string) (v *Bots, err error) {
+	o := orm.NewOrm()
+	var bot = &Bots{WXID: WXID}
+	if err = o.Read(bot, "WXID"); err != nil {
+		logs.Error("SendText: get bot info by WXID failed, err is ", err.Error())
+		return nil, err
+	}
+	return bot, nil
+}

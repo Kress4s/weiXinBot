@@ -1,8 +1,14 @@
 package models
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"time"
+	"weiXinBot/app/bridage/common"
+	"weiXinBot/app/bridage/constant"
 
+	"github.com/astaxie/beego/httplib"
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -37,8 +43,82 @@ func init() {
 	orm.RegisterModel(new(Message), new(Card))
 }
 
-// SendMessage receive struct
-type SendMessage struct {
-	Type    int         // 0: text 1:imgae 2:video 3:card  4: emoji
-	Content interface{} // data
+// SendTextMessage receive struct
+// type SendTextMessage struct {
+// 	Type    int         // 0: text 1:imgae 2:video 3:card  4: emoji
+// 	From    string      //发送者
+// 	To      string      // 接受者
+// 	Content interface{} // data
+// }
+type SendTextMessage struct {
+	At      []string `json:"at"`      // 发送者
+	To      string   `json:"to"`      // 接受者
+	Content string   `json:"content"` // word content
+}
+
+// SendImageMessage 发送图片消息
+type SendImageMessage struct {
+	To    string // 接受者
+	URL   string //image url
+	Token string //发送者的token
+}
+
+// SendText ...
+// @Param At: send wxid(origin WXID or modified wxid); To: received wxid ; content: send content
+// @Param proto method [post]
+func SendText(At, To, Content string) (err error) {
+	var bot *Bots
+	if bot, err = GetBotByWXID(At); err != nil {
+		return
+	}
+	// json 发送的数据
+	var sendText = new(SendTextMessage)
+	sendText.At = append(sendText.At, At)
+	sendText.To = To
+	sendText.Content = Content
+	res, verr := httplib.Post(constant.SEND_TEXT).Header(constant.H_AUTHORIZATION, bot.Token).JSONBody(&sendText)
+	if verr != nil {
+		logs.Error("send ")
+		return verr
+	}
+	var response common.StandardRestResult
+	if err = res.ToJSON(&response); err != nil {
+		logs.Error("ToJSON: send text interface response failed, err is", err.Error())
+	}
+	// 目前地底层协议发送成功和失败code都是0，没明确提示
+	if response.Code != 0 {
+		logs.Error("sender[%s] send message[%s] to receiver[%s] failed, err is ", At, Content, To, err.Error())
+		return err
+	}
+	return
+}
+
+// SendImage ...
+// @Param At: send wxid(origin WXID or modified wxid); content: send content
+// @Param proto method [get]
+func SendImage(At, To, Content string) (err error) {
+	var bot *Bots
+	if bot, err = GetBotByWXID(At); err != nil {
+		return
+	}
+	resp, verr := httplib.Get(constant.SEND_TEXT).Header(constant.H_AUTHORIZATION, bot.Token).Param("to", To).Param("url", Content).DoRequest()
+	if verr != nil {
+		logs.Error("send image[%s] to[%s] failed, err is ", Content, To)
+		return verr
+	}
+	var body []byte
+	if body, err = ioutil.ReadAll(resp.Body); err != nil {
+		return
+	}
+	var response common.StandardRestResult
+	if err = json.Unmarshal(body, &response); err != nil {
+		logs.Error("SendImage: json Unmarshal failed, err is ", err.Error())
+		return
+	}
+	// 目前地底层发送成功和失败code都是0，没明确提示
+	if response.Code != 0 {
+		logs.Error("send message[%s] to receiver[%s] failed, err is ", Content, To, err.Error())
+		return err
+	}
+	return
 }

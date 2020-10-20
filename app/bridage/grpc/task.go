@@ -22,6 +22,7 @@ type BotWorker struct {
 	BotID string
 }
 
+// Message ...
 type Message struct {
 	FromUserName struct {
 		Str string `json:"str"`
@@ -44,16 +45,16 @@ const (
 	Address string = constant.GRPC_BASE_URL
 )
 
-var conn *grpc.ClientConn // 一个连接
+var conn *grpc.ClientConn // 一个连接
 var lock sync.Mutex
 
 // GetConnInstance 获取连接
 func GetConnInstance() (*grpc.ClientConn, error) {
-	// var err error
+	var err error
 	lock.Lock()
 	defer lock.Unlock()
 	if conn == nil {
-		if conn, err := grpc.Dial(Address, grpc.WithInsecure()); err != nil {
+		if conn, err = grpc.Dial(Address, grpc.WithInsecure()); err != nil {
 			logs.Error("create grpc conn failed, err is ", err.Error())
 			return nil, err
 		}
@@ -62,7 +63,7 @@ func GetConnInstance() (*grpc.ClientConn, error) {
 }
 
 // PrepareParams 预置参数
-func (c *BotWorker) PrepareParams(token ,botID string){
+func (c *BotWorker) PrepareParams(token, botID string) {
 	c.BotID = botID
 	c.Token = botID
 }
@@ -73,14 +74,15 @@ func (c *BotWorker) Run() {
 	defer func() {
 		runtime.Goexit()
 		/*
-		TODO:
-		异常退出
-		1. 退出当前goroutine
-		2. 更改数据库机器人的状态
-		3. 记录日志(微信号、掉线时间)
-		4. 通过websoket方式通知web端掉线的微信号
+			TODO:
+			异常退出
+			1. 退出当前goroutine
+			2. 更改数据库机器人的状态
+			3. 记录日志(微信号、掉线时间)
+			4. 通过websoket方式通知web端掉线的微信号
 		*/
-	}
+
+	}()
 	grpcClient := pb.NewRockRpcServerClient(conn)
 	req := pb.StreamRequest{
 		Token: &c.Token,
@@ -93,25 +95,25 @@ func (c *BotWorker) Run() {
 		response, _ := res.Recv()
 		json.Unmarshal([]byte(*response.Payload), &message)
 		/*
-		TODO:处理信息内容
-		1. 群号，WXID查功能表，不存在直接pass
-		2. 存在会是个list，遍历根据type区分功能，查功能表
-		3. 分析结果
-		4. 根据机器人的微信号做出相应的动作
+			TODO:处理信息内容
+			1. 群号，WXID查功能表，不存在直接pass
+			2. 存在会是个list，遍历根据type区分功能，查功能表
+			3. 分析结果
+			4. 根据机器人的微信号做出相应的动作
 		*/
 	}
 
 }
 
 // CloseConn 关闭
-func (c *BotWorker) CloseConn(){
+func (c *BotWorker) CloseConn() {
 	conn.Close()
 }
 
-func init(){
+func init() {
 	var err error
-	conn, err =  GetConnInstance()
+	conn, err = GetConnInstance()
 	if err != nil {
-		panic("get gRPC intance faield,err is %s", err.Error())
+		panic(fmt.Errorf("get gRPC intance faield,err is %s", err.Error()))
 	}
 }

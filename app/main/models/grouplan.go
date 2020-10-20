@@ -133,6 +133,7 @@ func GetAllGrouplan(querys []*common.QueryConditon, fields []string, sortby []st
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
 			for _, v := range l {
+				o.LoadRelated(&v, "Groups")
 				ml = append(ml, v)
 			}
 		} else {

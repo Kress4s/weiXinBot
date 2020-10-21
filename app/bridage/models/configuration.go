@@ -37,7 +37,7 @@ func GroupIsNeedServer(fromUserName, toUserName string) (isServer bool, err erro
 	return true, nil
 }
 
-// GroupService 需要的服务
+// GroupService 需要的服务(master method)
 // keyContent: "push_content":"🛫张 : G吐总冠军"
 func GroupService(fromUserName, toUserName, keyContent string) {
 	o := orm.NewOrm()
@@ -52,10 +52,34 @@ func GroupService(fromUserName, toUserName, keyContent string) {
 		case 1:
 			//确定新人进群的数据结构再做处理
 			fmt.Println("新人进来了")
-
 		// is keywords function config
 		case 2:
-			fmt.Println("关键词回复")
+			// nameContent := strings.SplitN(keyContent, ":", 2)
+			var replyResource []*Resource
+			var isNeedServer bool
+			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, keyContent); err != nil {
+				logs.Error("KeyWordsService failed, err is ", err.Error())
+			} else if isNeedServer && err == nil {
+				for _, _rR := range replyResource {
+					for _, _rM := range _rR.Material {
+						switch _rM.Type {
+						case 1:
+							//回复的文字内容
+							if err = SendText(toUserName, fromUserName, _rM.Data); err != nil {
+								logs.Error("SendText %s send %s to %s failed, err is ", toUserName, fromUserName, _rM.Data)
+							}
+						case 2:
+							// 图片内容
+							if err = SendImage(toUserName, fromUserName, _rM.Data); err != nil {
+								logs.Error("SendImage %s send %s to %s failed, err is ", toUserName, fromUserName, _rM.Data)
+							}
+						default:
+							fmt.Println("等待扩展的类型")
+						}
+					}
+				}
+			}
+			// fmt.Println("关键词回复")
 		// is autokick function config
 		case 3:
 			fmt.Println("自动踢人")

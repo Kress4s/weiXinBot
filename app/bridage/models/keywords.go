@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/astaxie/beego/logs"
@@ -81,13 +82,137 @@ func MultiDeleteExactWordByIDs(ids string) (err error) {
 
 // KeyWordsService ...
 // @Params  keyContent: "push_content":"🛫张 : G吐总冠军"
-func KeyWordsService(keyContent string) (isNeedReply bool, replyContent []interface{}) {
+func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyContent []*Resource, err error) {
 	/*
 		1. 判断开关
 		2. 查找精准
 		3. 匹配模糊
-		4. 是否@; 是否attach上问题
-		5. 返回回复内容
+		4. 返回回复内容
 	*/
-	return
+	o := orm.NewOrm()
+	var kWord = KeyWords{ID: id}
+	if err = o.Read(&kWord); err != nil {
+		logs.Error("KeyWordsService: get keyward failed, err is ", err.Error())
+		return false, nil, err
+	}
+	// 开关关闭
+	if !kWord.Switch {
+		return false, nil, nil
+	}
+	var exWords []*ExactWord
+	var num int64
+	if num, err = o.QueryTable(new(ExactWord)).Filter("Question__KeyWords__ID", id).All(&exWords, "Word"); err != nil {
+		logs.Error("KeyWordsService: get all ExactWord by keyword ID failed, err is ", err.Error())
+		return false, nil, err
+	}
+	nameContent := strings.SplitN(keyContent, ":", 2)
+	// 设置了精准关键词
+	if num > 0 {
+		// 先精准匹配(匹配到直接模糊匹配)
+		for _, ew := range exWords {
+			if keyContent != ew.Word {
+				continue
+			}
+			// 匹配到(查回复内容)
+			var question *Question
+			if err = o.QueryTable(new(Question)).Filter("ExactWords__ID", ew.ID).One(question); err != nil {
+				logs.Error("KeyWordsService: get question by ExactWords__ID failed, err is ", err.Error())
+				return false, nil, err
+			}
+			// 查看是否设置回复资源
+			if len(question.Resources) == 0 {
+				return false, nil, nil
+			}
+			// 查找回复的资源
+			var replyresource []*Resource
+			if replyresource, err = GetResourceByIds(question.Resources); err != nil {
+				logs.Error("KeyWordsService: get Get replyresource by Resources failed, err is ", err.Error())
+				return false, nil, err
+			}
+			//检查配置设置
+			if kWord.IsAt && kWord.IsAttachQuestion {
+				for i := range replyresource {
+					for j := range replyresource[i].Material {
+						if replyresource[i].Material[j].Type == 1 {
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
+						}
+					}
+				}
+			} else if kWord.IsAt && !kWord.IsAttachQuestion {
+				for i := range replyresource {
+					for j := range replyresource[i].Material {
+						if replyresource[i].Material[j].Type == 1 {
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s\n%s", nameContent[0], replyresource[i].Material[j].Data)
+						}
+					}
+				}
+			} else {
+				for i := range replyresource {
+					for j := range replyresource[i].Material {
+						if replyresource[i].Material[j].Type == 1 {
+							replyresource[i].Material[j].Data = fmt.Sprintf("%s\n%s", nameContent[1], replyresource[i].Material[j].Data)
+						}
+					}
+				}
+			}
+			return true, replyresource, nil
+		}
+	}
+	var fuzzWords []*FuzzWord
+	if num, err = o.QueryTable(new(FuzzWord)).Filter("Question__KeyWords__ID", id).All(&fuzzWords, "Word"); err != nil {
+		logs.Error("KeyWordsService: get all FuzzWord by keyword ID failed, err is ", err.Error())
+		return false, nil, err
+	}
+	// 设置了模糊关键词
+	if num > 0 {
+		// 先模糊匹配(匹配到直接模糊匹配)
+		for _, fw := range fuzzWords {
+			if !strings.Contains(keyContent, fw.Word) {
+				continue
+			}
+			// 匹配到(查回复内容)
+			var question *Question
+			if err = o.QueryTable(new(Question)).Filter("FuzzWords__ID", fw.ID).One(question); err != nil {
+				logs.Error("KeyWordsService: get question by FuzzWords__ID failed, err is ", err.Error())
+				return false, nil, err
+			}
+			// 查看是否设置回复资源
+			if len(question.Resources) == 0 {
+				return false, nil, nil
+			}
+			// 查找回复的资源
+			var replyresource []*Resource
+			if replyresource, err = GetResourceByIds(question.Resources); err != nil {
+				logs.Error("KeyWordsService: get Get replyresource by Resources failed, err is ", err.Error())
+				return false, nil, err
+			}
+			if kWord.IsAt && kWord.IsAttachQuestion {
+				for i := range replyresource {
+					for j := range replyresource[i].Material {
+						if replyresource[i].Material[j].Type == 1 {
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
+						}
+					}
+				}
+			} else if kWord.IsAt && !kWord.IsAttachQuestion {
+				for i := range replyresource {
+					for j := range replyresource[i].Material {
+						if replyresource[i].Material[j].Type == 1 {
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s\n%s", nameContent[0], replyresource[i].Material[j].Data)
+						}
+					}
+				}
+			} else {
+				for i := range replyresource {
+					for j := range replyresource[i].Material {
+						if replyresource[i].Material[j].Type == 1 {
+							replyresource[i].Material[j].Data = fmt.Sprintf("%s\n%s", nameContent[1], replyresource[i].Material[j].Data)
+						}
+					}
+				}
+			}
+			return true, replyresource, nil
+		}
+	}
+	return false, nil, nil
 }

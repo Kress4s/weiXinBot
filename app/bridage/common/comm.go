@@ -14,6 +14,7 @@ type StandardRestResult struct {
 	Data    interface{} `json:"data"`
 }
 
+// RecieveGroupList ...
 // 从协议获取群ID列表数据结构
 type RecieveGroupList struct {
 	Code int `json:"code"`
@@ -24,6 +25,7 @@ type RecieveGroupList struct {
 	} `json:"data"`
 }
 
+// DetailGroupInfo ...
 // 从协议获取群详细信息的数据结构
 type DetailGroupInfo struct {
 	ID                string `json:"id"`

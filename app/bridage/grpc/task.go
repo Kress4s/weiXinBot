@@ -9,6 +9,7 @@ import (
 	"sync"
 	"weiXinBot/app/bridage/constant"
 	pb "weiXinBot/app/bridage/grpc/proto"
+	bridageModels "weiXinBot/app/bridage/models"
 
 	"github.com/astaxie/beego/logs"
 	"google.golang.org/grpc"
@@ -62,6 +63,11 @@ func GetConnInstance() (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
+// NewBotWorker ...
+func NewBotWorker() *BotWorker {
+	return new(BotWorker)
+}
+
 // PrepareParams 预置参数
 func (c *BotWorker) PrepareParams(token, botID string) {
 	c.BotID = botID
@@ -87,13 +93,20 @@ func (c *BotWorker) Run() {
 	req := pb.StreamRequest{
 		Token: &c.Token,
 	}
-	res, err := grpcClient.Sync(context.Background(), &req)
-	if err != nil {
-		log.Fatalf("Call Route err: %v", err)
+	res, verr := grpcClient.Sync(context.Background(), &req)
+	if verr != nil {
+		log.Fatalf("Call Route err: %v", verr)
 	}
+	var isNeedServer bool
+	var err error
 	for {
 		response, _ := res.Recv()
 		json.Unmarshal([]byte(*response.Payload), &message)
+		if isNeedServer, err = bridageModels.GroupIsNeedServer(message.FromUserName.Str, message.ToUserName.Str); err != nil {
+			logs.Error("GroupIsNeedServer failed, err is", err.Error())
+		} else if isNeedServer && err == nil {
+			bridageModels.GroupService(message.FromUserName.Str, message.ToUserName.Str, message.PushContent)
+		}
 		/*
 			TODO:处理信息内容
 			1. 群号，WXID查功能表，不存在直接pass

@@ -22,6 +22,7 @@ func Base64Decode(src []byte) ([]byte, error) {
 	return coder.DecodeString(string(src))
 }
 
+// EncodeMD5 ...
 // encodeMD5 md5加密
 func EncodeMD5(value string) string {
 	m := md5.New()

@@ -178,6 +178,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"],
+        beego.ControllerComments{
+            Method: "MultiPut",
+            Router: "/updatemulti",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:KeyWordsController"],
         beego.ControllerComments{
             Method: "Post",

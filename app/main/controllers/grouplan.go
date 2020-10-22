@@ -131,17 +131,11 @@ func (c *GrouPlanController) GetAll() {
 			query = append(query, qcondtion)
 		}
 	}
-	l, count, err := models.GetAllGrouplan(query, fields, sortby, order, offset, limit)
+	l, _, err := models.GetAllGrouplan(query, fields, sortby, order, offset, limit)
 	if err != nil {
 		c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
 	} else {
-		c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: struct {
-			Items interface{}
-			Total int64
-		}{
-			Items: l,
-			Total: count,
-		}}
+		c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: l}
 	}
 	c.ServeJSON()
 }

@@ -120,3 +120,31 @@ func (c *GroupController) Put() {
 	}
 	err = models.UpdateGrouByID(&v)
 }
+
+// MultiPut ...
+// @router /updatemulti [put]
+func (c *GroupController) MultiPut() {
+	var moveOutGroups string
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	type Groups struct {
+		Data []*bridageModels.Group `json:"Data"`
+	}
+	// delGroupIDS:   GID:BOTID,GID2:BOTID2...
+	if moveOutGroups = c.GetString("delGroupIDS"); len(moveOutGroups) == 0 {
+		err = fmt.Errorf("moveOutGroups cant be null")
+		return
+	}
+	var v Groups
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
+		return
+	}
+	err = models.MultiUpdateGrouByID(v.Data, moveOutGroups)
+}

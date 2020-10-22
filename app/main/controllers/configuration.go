@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"strconv"
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/common/base"
 	bridageModels "weiXinBot/app/bridage/models"
@@ -35,4 +36,25 @@ func (c *ConfigurationController) Post() {
 		return
 	}
 	_, err = models.AddConfiguration(v)
+}
+
+// Put ...
+// @router /:id [put]
+func (c *ConfigurationController) Put() {
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	idStr := c.Ctx.Input.Param(":id")
+	id, _ := strconv.ParseInt(idStr, 0, 64)
+	var v = bridageModels.Configuration{ID: id}
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
+		return
+	}
+	err = models.UpdateConfigurationByID(&v)
 }

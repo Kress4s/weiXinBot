@@ -14,7 +14,7 @@ type Configuration struct {
 	Type      int    `orm:"column(type)"`                 // 配置对象 0: 群组; 1: 联系人 ...可拓展
 	FuncType  int    `orm:"column(function_type)"`        // 功能配置类型 1:入群欢迎语 2:关键词回复 3:自动踢人...可拓展
 	FuncID    int64  `orm:"column(function_id)"`          // 配置ID
-	BotID     string `orm:"size(30);column(bot_id)"`      // 机器人微信ID，执行消息回复、踢人等操作的微信号(保证机器人是正确的)
+	BotWXID   string `orm:"size(30);column(bot_wxid)"`    // 机器人微信ID，执行消息回复、踢人等操作的微信号(保证机器人是正确的)
 	ObjectIDS string `orm:"size(200);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
 }
 
@@ -31,7 +31,7 @@ func GroupIsNeedServer(fromUserName, toUserName string) (isServer bool, err erro
 	if !strings.Contains(fromUserName, "@chatroom") {
 		return false, nil
 	}
-	if !o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", fromUserName).Filter("BotID", toUserName).Exist() {
+	if !o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", fromUserName).Filter("BotWXID", toUserName).Exist() {
 		return false, nil
 	}
 	return true, nil
@@ -43,7 +43,7 @@ func GroupService(fromUserName, toUserName, keyContent string) {
 	o := orm.NewOrm()
 	var err error
 	var configs []*Configuration
-	if _, err = o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", fromUserName).Filter("BotID", toUserName).All(&configs); err != nil {
+	if _, err = o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", fromUserName).Filter("BotWXID", toUserName).All(&configs); err != nil {
 		logs.Error("get Configuration by fromUserName and toUserName failed, err is ", err.Error())
 	}
 	for _, v := range configs {

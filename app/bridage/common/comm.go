@@ -28,17 +28,20 @@ type RecieveGroupList struct {
 // DetailGroupInfo ...
 // 从协议获取群详细信息的数据结构
 type DetailGroupInfo struct {
-	ID                string `json:"id"`
-	NickName          string `json:"nick_name"`
-	AliasName         string `json:"alias_name"`
-	Sex               int    `json:"sex"`
-	Country           string `json:"country"`
-	Province          string `json:"province"`
-	City              string `json:"city"`
-	Signature         string `json:"signature"`
-	HeadBigImageURL   string `json:"head_big_image_url"`
+	ID        string `json:"wx_id"`
+	NickName  string `json:"nick_name"`
+	Owner     string `json:"owner"`
+	MemberNum int    `json:"member_num"`
+	// AliasName         string `json:"alias_name"`
+	// Sex               int    `json:"sex"`
+	// Country           string `json:"country"`
+	// Province          string `json:"province"`
+	// City              string `json:"city"`
+	// Signature         string `json:"signature"`
+	// HeadBigImageURL   string `json:"head_big_image_url"`
 	HeadSmallImageURL string `json:"head_small_image_url"`
-	Label             string `json:"label"`
+	// Status            int    `json:"status"` (群组的属性 不知道干嘛的先保留)
+	// Label             string `json:"label"`
 }
 
 // 查询条件常量

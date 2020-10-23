@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"runtime"
 	"sync"
 	"weiXinBot/app/bridage/constant"
 	pb "weiXinBot/app/bridage/grpc/proto"
@@ -71,14 +70,14 @@ func NewBotWorker() *BotWorker {
 // PrepareParams 预置参数
 func (c *BotWorker) PrepareParams(token, botID string) {
 	c.BotID = botID
-	c.Token = botID
+	c.Token = token
 }
 
 // Run 开始监听
 func (c *BotWorker) Run() {
 	var message Message
+	ctx, cancle := context.WithCancel(context.Background())
 	defer func() {
-		runtime.Goexit()
 		/*
 			TODO:
 			异常退出
@@ -87,7 +86,7 @@ func (c *BotWorker) Run() {
 			3. 记录日志(微信号、掉线时间)
 			4. 通过websoket方式通知web端掉线的微信号
 		*/
-
+		cancle()
 	}()
 	grpcClient := pb.NewRockRpcServerClient(conn)
 	req := pb.StreamRequest{
@@ -97,15 +96,14 @@ func (c *BotWorker) Run() {
 	if verr != nil {
 		log.Fatalf("Call Route err: %v", verr)
 	}
-	var isNeedServer bool
 	var err error
 	for {
 		response, _ := res.Recv()
-		json.Unmarshal([]byte(*response.Payload), &message)
-		if isNeedServer, err = bridageModels.GroupIsNeedServer(message.FromUserName.Str, message.ToUserName.Str); err != nil {
-			logs.Error("GroupIsNeedServer failed, err is", err.Error())
-		} else if isNeedServer && err == nil {
-			bridageModels.GroupService(message.FromUserName.Str, message.ToUserName.Str, message.PushContent)
+		if err = json.Unmarshal([]byte(*response.Payload), &message); err == nil {
+			// 开始执行监控操作
+			go BeginServer(ctx, message)
+		} else {
+			logs.Error("json Unmarshal meaasge failed, err is ", err.Error())
 		}
 		/*
 			TODO:处理信息内容
@@ -115,7 +113,23 @@ func (c *BotWorker) Run() {
 			4. 根据机器人的微信号做出相应的动作
 		*/
 	}
+}
 
+// BeginServer By Message
+func BeginServer(ctx context.Context, message Message) {
+	var isNeedServer bool
+	var err error
+	select {
+	case <-ctx.Done():
+		logs.Debug("one Bot quit...")
+		return
+	default:
+		if isNeedServer, err = bridageModels.GroupIsNeedServer(message.FromUserName.Str, message.ToUserName.Str); err != nil {
+			logs.Error("GroupIsNeedServer failed, err is", err.Error())
+		} else if isNeedServer && err == nil {
+			bridageModels.GroupService(message.FromUserName.Str, message.ToUserName.Str, message.PushContent)
+		}
+	}
 }
 
 // CloseConn 关闭

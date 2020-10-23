@@ -16,16 +16,16 @@ import (
 
 // Group ...
 type Group struct {
-	GID            string     `orm:"pk;size(50);column(g_id)" `              // json:wx_id
-	NickName       string     `orm:"size(50);column(nick_name)" `            //
-	Owner          string     `orm:"size(50);column(owner)" `                //群主
-	MemberNum      int        `orm:"column(member_num)"`                     //
-	HeadSmallImage string     `orm:"size(200);column(head_small_image_url)"` //
-	Listers        string     `orm:"size(500);column(listers)"`              //成员微信号的IDs，”，“连接 接口返回值[]不好处理 记录1
-	IsNeedServe    bool       `orm:"column(isneedserve);default(0)"`         // 是否有服务功能
-	Bots           *Bots      `orm:"rel(fk)"`                                //
-	GroupPlan      *GroupPlan `orm:"null;rel(fk)"`                           //群方案
-	Messages       []*Message `orm:"reverse(many)"`                          //
+	GID            string     `orm:"pk;size(50);column(g_id)" json:"wx_id" `                             // json:wx_id
+	NickName       string     `orm:"size(50);column(nick_name)" json:"nick_name"`                        //
+	Owner          string     `orm:"size(50);column(owner)" json:"owner" `                               //群主
+	MemberNum      int        `orm:"column(member_num)" json:"member_num"`                               //
+	HeadSmallImage string     `orm:"size(200);column(head_small_image_url)" json:"head_small_image_url"` //
+	Listers        string     `orm:"size(500);column(listers)" json:"listers"`                           //成员微信号的IDs，”，“连接 接口返回值[]不好处理 记录1
+	IsNeedServe    bool       `orm:"column(isneedserve);default(0)" json:"isneedserver"`                 // 是否有服务功能
+	Bots           *Bots      `orm:"rel(fk)"`                                                            //
+	GroupPlan      *GroupPlan `orm:"null;rel(fk)"`                                                       //群方案
+	Messages       []*Message `orm:"reverse(many)"`                                                      //
 }
 
 func init() {
@@ -73,15 +73,15 @@ func ProtoGiveGroup(Authorization string) (ret interface{}, err error) {
 		for _, id := range restBody.Data.IDs {
 			queryIDList = append(queryIDList, id)
 		}
-		query := "?ids=" + strings.Join(queryIDList, "&ids=")
+		query := "?group_id=" + strings.Join(queryIDList, "&group_id=")
 		var gresp *http.Response
-		if gresp, err = httplib.Get(constant.CONTACT_BATCH_URL+query).Header(constant.H_AUTHORIZATION, Authorization).DoRequest(); err != nil {
-			logs.Error("get response[%s] failed, err is ", constant.CONTACT_GROUP_LIST_URL, err.Error())
+		if gresp, err = httplib.Get(constant.GROUP_INFO_URL+query).Header(constant.H_AUTHORIZATION, Authorization).DoRequest(); err != nil {
+			logs.Error("get response[%s] failed, err is ", constant.GROUP_INFO_URL, err.Error())
 			return nil, err
 		}
 		var allgbody []byte
 		if allgbody, err = ioutil.ReadAll(gresp.Body); err != nil {
-			logs.Error("get URL[%s] body failed, err is ", constant.CONTACT_BATCH_URL, err.Error())
+			logs.Error("get URL[%s] body failed, err is ", constant.GROUP_INFO_URL, err.Error())
 			return nil, err
 		}
 		var allgrouprestBody GetMultiDetailGroupInfo

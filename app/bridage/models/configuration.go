@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"strings"
+	"weiXinBot/app/bridage/common"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -25,25 +26,27 @@ func init() {
 // GroupIsNeedServer 查看此群是否需要机器人服务
 // @Param fromUserName: {Str:22475302355@chatroom}
 // @Param toUserName: {Str:wxid_vao3ptfez4p22}}
-func GroupIsNeedServer(fromUserName, toUserName string) (isServer bool, err error) {
+// func GroupIsNeedServer(fromUserName, toUserName string) (isServer bool, err error) {
+func GroupIsNeedServer(message common.ProtoMessage) (isServer bool, err error) {
 	o := orm.NewOrm()
 	// is group message
-	if !strings.Contains(fromUserName, "@chatroom") {
+	if !strings.Contains(message.FromUserName.Str, "@chatroom") {
 		return false, nil
 	}
-	if !o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", fromUserName).Filter("BotWXID", toUserName).Exist() {
+	if !o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", message.FromUserName.Str).Filter("BotWXID", message.ToUserName.Str).Exist() {
 		return false, nil
 	}
 	return true, nil
 }
 
 // GroupService 需要的服务(master method)
-// keyContent: "push_content":"🛫张 : G吐总冠军"
-func GroupService(fromUserName, toUserName, keyContent string) {
+// message.PushContent: "push_content":"🛫张 : G吐总冠军"
+// func GroupService(fromUserName, toUserName, keyContent string) {
+func GroupService(message common.ProtoMessage) {
 	o := orm.NewOrm()
 	var err error
 	var configs []*Configuration
-	if _, err = o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", fromUserName).Filter("BotWXID", toUserName).All(&configs); err != nil {
+	if _, err = o.QueryTable(new(Configuration)).Filter("Type", 0).Filter("ObjectIDS__icontains", message.FromUserName.Str).Filter("BotWXID", message.ToUserName.Str).All(&configs); err != nil {
 		logs.Error("get Configuration by fromUserName and toUserName failed, err is ", err.Error())
 	}
 	for _, v := range configs {
@@ -51,27 +54,74 @@ func GroupService(fromUserName, toUserName, keyContent string) {
 		// is welcome function config
 		case 1:
 			//确定新人进群的数据结构再做处理
-			fmt.Println("新人进来了")
-		// is keywords function config
-		case 2:
-			// nameContent := strings.SplitN(keyContent, ":", 2)
+			// 当前文本消息的类型是 MesType = 10002
+			if message.MsgType != 10002 {
+				continue
+			}
+			fmt.Println("有新人进来的消息")
+			var parsesysmsg *common.WxSysMsg
+			if parsesysmsg, err = common.PraseXMLString(message.Content.Str); err != nil {
+				logs.Error(err.Error())
+			}
 			var replyResource []*Resource
 			var isNeedServer bool
-			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, keyContent); err != nil {
-				logs.Error("KeyWordsService failed, err is ", err.Error())
-			} else if isNeedServer && err == nil {
+			if isNeedServer, replyResource, err = WelcomeService(v.FuncID, message.PushContent); err != nil {
+				logs.Error("%s send some resources to group or contact([%s]) failed...", v.BotWXID, message.FromUserName.Str)
+				continue
+			} else if isNeedServer && replyResource != nil && err == nil {
 				for _, _rR := range replyResource {
 					for _, _rM := range _rR.Material {
 						switch _rM.Type {
 						case 1:
 							//回复的文字内容
-							if err = SendText(toUserName, fromUserName, _rM.Data); err != nil {
-								logs.Error("SendText %s send %s to %s failed, err is ", toUserName, fromUserName, _rM.Data)
+							logs.Info("开始发送文字...")
+							if strings.Contains(_rM.Data, "{{@新人}}") {
+								var newAtData = fmt.Sprintf("@%s", parsesysmsg.SysmsgTemplate.ContenTemplate.Linklist.Link[0].MemberList.Member[0].NickName)
+								_rM.Data = strings.ReplaceAll(_rM.Data, "{{@新人}}", newAtData)
+							}
+							if err = SendText(message.ToUserName.Str, message.FromUserName.Str, _rM.Data); err != nil {
+								logs.Error("SendText %s send %s to %s failed, err is ", message.ToUserName.Str, message.FromUserName.Str, _rM.Data)
 							}
 						case 2:
 							// 图片内容
-							if err = SendImage(toUserName, fromUserName, _rM.Data); err != nil {
-								logs.Error("SendImage %s send %s to %s failed, err is ", toUserName, fromUserName, _rM.Data)
+							logs.Info("开始发送图片...")
+							if err = SendImage(message.ToUserName.Str, message.FromUserName.Str, _rM.Data); err != nil {
+								logs.Error("SendImage %s send %s to %s failed, err is ", message.ToUserName.Str, message.FromUserName.Str, _rM.Data)
+							}
+						default:
+							fmt.Println("等待扩展的类型")
+						}
+					}
+				}
+			}
+		// is keywords function config
+		case 2:
+			// 当前文本消息的类型是 MesType = 1
+			// nameContent := strings.SplitN(keyContent, ":", 2)
+			if message.MsgType != 1 {
+				continue
+			}
+			fmt.Println("开启关键词查询服务..")
+			var replyResource []*Resource
+			var isNeedServer bool
+			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.PushContent); err != nil {
+				logs.Error("KeyWordsService failed, err is ", err.Error())
+			} else if isNeedServer && err == nil {
+				logs.Info("找到问题库...开始查找资源...")
+				for _, _rR := range replyResource {
+					for _, _rM := range _rR.Material {
+						switch _rM.Type {
+						case 1:
+							//回复的文字内容
+							logs.Info("开始发送文字...")
+							if err = SendText(message.ToUserName.Str, message.FromUserName.Str, _rM.Data); err != nil {
+								logs.Error("SendText %s send %s to %s failed, err is ", message.ToUserName.Str, message.FromUserName.Str, _rM.Data)
+							}
+						case 2:
+							// 图片内容
+							logs.Info("开始发送图片...")
+							if err = SendImage(message.ToUserName.Str, message.FromUserName.Str, _rM.Data); err != nil {
+								logs.Error("SendImage %s send %s to %s failed, err is ", message.ToUserName.Str, message.FromUserName.Str, _rM.Data)
 							}
 						default:
 							fmt.Println("等待扩展的类型")

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/constant"
 	pb "weiXinBot/app/bridage/grpc/proto"
 	bridageModels "weiXinBot/app/bridage/models"
@@ -20,24 +21,6 @@ type BotWorker struct {
 	// Lock  sync.Mutex
 	Token string
 	BotID string
-}
-
-// Message ...
-type Message struct {
-	FromUserName struct {
-		Str string `json:"str"`
-	} `json:"from_user_name"` //
-	ToUserName struct {
-		Str string `json:"str"`
-	} `json:"to_user_name"` //
-	MsgType string `json:"msg_type"` // 消息类型
-	Content struct {
-		Str string `json:"str"`
-	} `json:"content"` // 内容(我发：{"str":"程序监控你"}；别人发：{"str":"aaaa520jj:\nG吐总冠军"})
-	Status      int    `json:"status"`       //貌似群的消息都是
-	CreateTime  int    `json:"create_time"`  //消息时间戳
-	MsgSource   string `json:"msg_source"`   // ?
-	PushContent string `json:"push_content"` //提示消息(聊天输入框提示) (别人发有这个字段，我发没有这个字段)
 }
 
 const (
@@ -75,7 +58,8 @@ func (c *BotWorker) PrepareParams(token, botID string) {
 
 // Run 开始监听
 func (c *BotWorker) Run() {
-	var message Message
+	var message common.ProtoMessage
+	var err error
 	ctx, cancle := context.WithCancel(context.Background())
 	defer func() {
 		/*
@@ -86,7 +70,12 @@ func (c *BotWorker) Run() {
 			3. 记录日志(微信号、掉线时间)
 			4. 通过websoket方式通知web端掉线的微信号
 		*/
-		cancle()
+		cancle() //通知所有的goroutine退出
+		if err = bridageModels.UpdateBotLoginStatusByWXID(c.BotID); err == nil {
+			logs.Info("%s has offlined, please check it to relogin", c.BotID)
+		}
+		// wetsocket 通知前端
+
 	}()
 	grpcClient := pb.NewRockRpcServerClient(conn)
 	req := pb.StreamRequest{
@@ -96,12 +85,22 @@ func (c *BotWorker) Run() {
 	if verr != nil {
 		log.Fatalf("Call Route err: %v", verr)
 	}
-	var err error
 	for {
 		response, _ := res.Recv()
 		if err = json.Unmarshal([]byte(*response.Payload), &message); err == nil {
-			// 开始执行监控操作
-			go BeginServer(ctx, message)
+			// 开始执行监控操作(后期对message进行类型的解析，避免开启多余的goroutine资源)
+			// 目前只需要处理
+			/*
+				MsgType = 1    (群或者联系人发送文本消息)
+				MsgType = 10002(新人入群和踢人出群)
+			*/
+			// 目前只处理 MsgType = 1 或者 10002消息类型
+			if message.MsgType == 1 || message.MsgType == 10002 {
+				logs.Info("确认开始服务...")
+				go BeginServer(ctx, message)
+			} else {
+				logs.Info("message type is not need to deal with")
+			}
 		} else {
 			logs.Error("json Unmarshal meaasge failed, err is ", err.Error())
 		}
@@ -116,7 +115,7 @@ func (c *BotWorker) Run() {
 }
 
 // BeginServer By Message
-func BeginServer(ctx context.Context, message Message) {
+func BeginServer(ctx context.Context, message common.ProtoMessage) {
 	var isNeedServer bool
 	var err error
 	select {
@@ -124,10 +123,12 @@ func BeginServer(ctx context.Context, message Message) {
 		logs.Debug("one Bot quit...")
 		return
 	default:
-		if isNeedServer, err = bridageModels.GroupIsNeedServer(message.FromUserName.Str, message.ToUserName.Str); err != nil {
+		if isNeedServer, err = bridageModels.GroupIsNeedServer(message); err != nil {
+			// if isNeedServer, err = bridageModels.GroupIsNeedServer(message.FromUserName.Str, message.ToUserName.Str); err != nil {
 			logs.Error("GroupIsNeedServer failed, err is", err.Error())
 		} else if isNeedServer && err == nil {
-			bridageModels.GroupService(message.FromUserName.Str, message.ToUserName.Str, message.PushContent)
+			logs.Info("确认需要群服务...")
+			bridageModels.GroupService(message)
 		}
 	}
 }

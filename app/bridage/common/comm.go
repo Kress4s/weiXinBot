@@ -1,5 +1,7 @@
 package common
 
+import "encoding/xml"
+
 //RestResult Rest接口返回值
 type RestResult struct {
 	Code    int         // 0 表示成功，其他失败
@@ -42,6 +44,46 @@ type DetailGroupInfo struct {
 	HeadSmallImageURL string `json:"head_small_image_url"`
 	// Status            int    `json:"status"` (群组的属性 不知道干嘛的先保留)
 	// Label             string `json:"label"`
+}
+
+// WxSysMsg 目前踢人和新人入群发送的消息通知
+type WxSysMsg struct {
+	XMLName        xml.Name `xml:"sysmsg"`
+	SysmsgTemplate struct {
+		ContenTemplate struct {
+			// Plain    string `xml:"plain"`
+			Template string `xml:"template"`
+			Linklist struct {
+				Link []struct {
+					Type       string `xml:"name,attr"` //新人入群：adder；踢人：kickoutname
+					MemberList struct {
+						Member []struct {
+							Username string `xml:"username"`
+							NickName string `xml:"nickname"`
+						} `xml:"member"`
+					} `xml:"memberlist"`
+				} `xml:"link"`
+			} `xml:"link_list"`
+		} `xml:"content_template"`
+	} `xml:"sysmsgtemplate"`
+}
+
+// ProtoMessage 底层协议推送的消息
+type ProtoMessage struct {
+	FromUserName struct {
+		Str string `json:"str"`
+	} `json:"from_user_name"` //
+	ToUserName struct {
+		Str string `json:"str"`
+	} `json:"to_user_name"` //
+	MsgType int `json:"msg_type"` // 消息类型 10002(踢人、加人的消息类型(xml))
+	Content struct {
+		Str string `json:"str"`
+	} `json:"content"` // 内容(我发：{"str":"程序监控你"}；别人发：{"str":"aaaa520jj:\nG吐总冠军"})
+	Status      int    `json:"status"`       //貌似群的消息都是
+	CreateTime  int    `json:"create_time"`  //消息时间戳
+	MsgSource   string `json:"msg_source"`   // ?
+	PushContent string `json:"push_content"` //提示消息(聊天输入框提示) (别人发有这个字段，我发没有这个字段)
 }
 
 // 查询条件常量

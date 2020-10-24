@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -19,4 +20,21 @@ type Welcome struct {
 
 func init() {
 	orm.RegisterModel(new(Welcome))
+}
+
+// WelcomeService ...
+func WelcomeService(id int64, keyContent string) (isNeedReply bool, replyContent []*Resource, err error) {
+	o := orm.NewOrm()
+	var welcome = Welcome{ID: id}
+	if err = o.Read(&welcome); err != nil {
+		logs.Error("WelcomeService: get welcome by id failed, err is ", err.Error())
+		return false, nil, err
+	}
+	if !welcome.Switch {
+		return false, nil, nil
+	}
+	if replyContent, err = GetResourceByIds(welcome.Resources); err == nil {
+		return true, replyContent, nil
+	}
+	return false, nil, err
 }

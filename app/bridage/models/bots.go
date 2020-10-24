@@ -97,3 +97,18 @@ func GetBotByWXID(WXID string) (v *Bots, err error) {
 	}
 	return bot, nil
 }
+
+// UpdateBotLoginStatusByWXID giving grpc offline to use
+func UpdateBotLoginStatusByWXID(wxid string) (err error) {
+	o := orm.NewOrm()
+	var bot = Bots{WXID: wxid}
+	if err = o.Read(&bot, "WXID"); err == nil {
+		var num int64
+		bot.LoginStatus = 0
+		if num, err = o.Update(&bot, "LoginStatus"); err == nil {
+			logs.Debug("Number of User update in database:", num)
+			return
+		}
+	}
+	return
+}

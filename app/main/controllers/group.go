@@ -223,10 +223,7 @@ func (c *GroupController) MultiPut() {
 		Data []*bridageModels.Group `json:"Data"`
 	}
 	// delGroupIDS:   GID:BOTID,GID2:BOTID2...
-	if moveOutGroups = c.GetString("delGroupIDS"); len(moveOutGroups) == 0 {
-		err = fmt.Errorf("moveOutGroups cant be null")
-		return
-	}
+	moveOutGroups = c.GetString("delGroupIDS")
 	var v Groups
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return

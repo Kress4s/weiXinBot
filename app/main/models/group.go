@@ -212,6 +212,9 @@ func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err err
 		}
 	}
 	// 解析删除群组的参数gid:botid,gid2:botid2...
+	if len(delgroupsIDs) == 0 {
+		return nil
+	}
 	delGroupSlice := strings.Split(delgroupsIDs, ",")
 	for _, m := range delGroupSlice {
 		gbid := strings.Split(m, ":")

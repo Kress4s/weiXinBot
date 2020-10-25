@@ -14,7 +14,7 @@ type KeyWords struct {
 	Type             int         `orm:"column(type);default(2)"`     // 所属功能类型 （默认2）
 	Switch           bool        `orm:"column(switch);default(1)"`   //功能总开关
 	IsAt             bool        `orm:"column(isAt)"`                // 回复是否@对方
-	IsAttachQuestion bool        `orm:"Isattachquestion"`            // 回复是否携带问题
+	IsAttachQuestion bool        `orm:"column(Is_attach_question)"`  // 回复是否携带问题
 	Resources        string      `orm:"size(300); column(resouces)"` // 来自资源库的具体回复内容(ids, ","连接,有多个)
 	Questions        []*Question `orm:"reverse(many)"`               //
 	GroupPlan        *GroupPlan  `orm:"rel(fk)"`                     //

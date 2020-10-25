@@ -116,7 +116,9 @@ func (c *GroupController) GetAll() {
 	}
 	// offset: 0 (default is 0)
 	if v, err := c.GetInt64("offset"); err == nil {
-		offset = v
+		// 配合奇葩vue offset 初始为1
+		offset = v - 1
+		// offset = v
 	}
 	// sortby: col1,col2
 	if v := c.GetString("sortby"); v != "" {

@@ -26,7 +26,7 @@ func init() {
 func GetGrouPlanFuncSwitch(grouplanID int64) (ret map[int]int, err error) {
 	var wel Welcome
 	var keyword KeyWords
-	// var autokick AutoKick
+	// var autokick AutoKickx
 	var whitelist WhiteList
 	m := make(map[int]int)
 	o := orm.NewOrm()
@@ -52,7 +52,7 @@ func GetGrouPlanFuncSwitch(grouplanID int64) (ret map[int]int, err error) {
 			return nil, err
 		}
 	} else {
-		if wel.Switch == true {
+		if keyword.Switch == true {
 			m[1] = 1
 		} else {
 			m[1] = 0
@@ -81,7 +81,7 @@ func GetGrouPlanFuncSwitch(grouplanID int64) (ret map[int]int, err error) {
 			return nil, err
 		}
 	} else {
-		if wel.Switch == true {
+		if whitelist.Switch == true {
 			m[3] = 1
 		} else {
 			m[3] = 0

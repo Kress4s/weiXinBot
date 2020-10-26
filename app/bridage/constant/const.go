@@ -29,7 +29,7 @@ const (
 
 const (
 	BASE_URL      = "http://49.234.86.244:8080" //微信对接baselink
-	GRPC_BASE_URL = "http://49.234.86.244:8081" // 消息监控的地址
+	GRPC_BASE_URL = "49.234.86.244:8081"        // 消息监控的地址
 )
 
 // login

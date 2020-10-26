@@ -205,6 +205,7 @@ func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err err
 			var _M = bridageModels.Group{GID: _m.GID, Bots: _m.Bots}
 			if err = o.Read(&_M, "GID", "Bots"); err == nil {
 				var num int64
+				_m.ID = _M.ID
 				if num, err = o.Update(_m); err == nil {
 					logs.Debug("Number of Group update in database:", num)
 				}

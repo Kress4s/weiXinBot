@@ -8,6 +8,7 @@ import (
 type WhiteList struct {
 	ID        int64      `orm:"auto;column(id)"`               //
 	WXID      string     `orm:"size(50);column(wx_id);unique"` // 微信id
+	Switch    bool       `orm:"column(switch);default(1)"`     //功能总开关
 	Type      int        `orm:"column(type);default(4)"`       // 所属功能类型 （默认4）
 	GroupPlan *GroupPlan `orm:"rel(fk)"`                       //
 }

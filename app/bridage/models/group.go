@@ -16,7 +16,8 @@ import (
 
 // Group ...
 type Group struct {
-	GID            string     `orm:"pk;size(50);column(g_id)" json:"wx_id" `                             // json:wx_id
+	ID             int64      `orm:"auto;column(id)"`
+	GID            string     `orm:"size(50);column(g_id)" json:"wx_id" `                                // json:wx_id
 	NickName       string     `orm:"size(50);column(nick_name)" json:"nick_name"`                        //
 	Owner          string     `orm:"size(50);column(owner)" json:"owner" `                               //群主
 	MemberNum      int        `orm:"column(member_num)" json:"member_num"`                               //
@@ -26,6 +27,14 @@ type Group struct {
 	Bots           *Bots      `orm:"rel(fk)"`                                                            //
 	GroupPlan      *GroupPlan `orm:"null;rel(fk)"`                                                       //群方案
 	Messages       []*Message `orm:"reverse(many)"`                                                      //
+}
+
+// TableUnique ...
+// 多字段唯一键
+func (u *Group) TableUnique() [][]string {
+	return [][]string{
+		{"GID", "Bots"},
+	}
 }
 
 func init() {

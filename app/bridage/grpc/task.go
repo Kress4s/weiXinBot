@@ -58,7 +58,6 @@ func (c *BotWorker) PrepareParams(token, botID string) {
 
 // Run 开始监听
 func (c *BotWorker) Run() {
-	var message common.ProtoMessage
 	var err error
 	ctx, cancle := context.WithCancel(context.Background())
 	defer func() {
@@ -71,9 +70,9 @@ func (c *BotWorker) Run() {
 			4. 通过websoket方式通知web端掉线的微信号
 		*/
 		cancle() //通知所有的goroutine退出
-		if err = bridageModels.UpdateBotLoginStatusByWXID(c.BotID); err == nil {
-			logs.Info("%s has offlined, please check it to relogin", c.BotID)
-		}
+		// if err = bridageModels.UpdateBotLoginStatusByWXID(c.BotID); err == nil {
+		// 	logs.Info("%s has offlined, please check it to relogin", c.BotID)
+		// }
 		// wetsocket 通知前端
 
 	}()
@@ -86,6 +85,8 @@ func (c *BotWorker) Run() {
 		log.Fatalf("Call Route err: %v", verr)
 	}
 	for {
+		var message common.ProtoMessage
+		fmt.Println("开始监控")
 		response, _ := res.Recv()
 		if err = json.Unmarshal([]byte(*response.Payload), &message); err == nil {
 			// 开始执行监控操作(后期对message进行类型的解析，避免开启多余的goroutine资源)
@@ -95,6 +96,7 @@ func (c *BotWorker) Run() {
 				MsgType = 10002(新人入群和踢人出群)
 			*/
 			// 目前只处理 MsgType = 1 或者 10002消息类型
+			fmt.Printf("%+v\n", message)
 			if message.MsgType == 1 || message.MsgType == 10002 {
 				logs.Info("确认开始服务...")
 				go BeginServer(ctx, message)

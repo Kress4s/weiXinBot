@@ -14,7 +14,7 @@ type KeyWords struct {
 	Type             int         `orm:"column(type);default(2)"`     // 所属功能类型 （默认2）
 	Switch           bool        `orm:"column(switch);default(1)"`   //功能总开关
 	IsAt             bool        `orm:"column(isAt)"`                // 回复是否@对方
-	IsAttachQuestion bool        `orm:"column(Is_attach_question)"`  // 回复是否携带问题
+	IsAttachQuestion bool        `orm:"column(is_attach_question)"`  // 回复是否携带问题
 	Resources        string      `orm:"size(300); column(resouces)"` // 来自资源库的具体回复内容(ids, ","连接,有多个)
 	Questions        []*Question `orm:"reverse(many)"`               //
 	GroupPlan        *GroupPlan  `orm:"rel(fk)"`                     //
@@ -101,21 +101,22 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 	}
 	var exWords []*ExactWord
 	var num int64
-	if num, err = o.QueryTable(new(ExactWord)).Filter("Question__KeyWords__ID", id).All(&exWords, "Word"); err != nil {
+	if num, err = o.QueryTable(new(ExactWord)).Filter("Question__KeyWords__ID", id).All(&exWords); err != nil {
 		logs.Error("KeyWordsService: get all ExactWord by keyword ID failed, err is ", err.Error())
 		return false, nil, err
 	}
-	nameContent := strings.SplitN(keyContent, ":", 2)
+	keyContent = strings.ReplaceAll(keyContent, "\n", "")
+	nameContent := strings.Split(keyContent, ":")
 	// 设置了精准关键词
 	if num > 0 {
 		// 先精准匹配(匹配到直接模糊匹配)
 		for _, ew := range exWords {
-			if keyContent != ew.Word {
+			if nameContent[1] != ew.Word {
 				continue
 			}
 			// 匹配到(查回复内容)
-			var question *Question
-			if err = o.QueryTable(new(Question)).Filter("ExactWords__ID", ew.ID).One(question); err != nil {
+			var question Question
+			if err = o.QueryTable(new(Question)).Filter("ExactWords__ID", ew.ID).One(&question); err != nil {
 				logs.Error("KeyWordsService: get question by ExactWords__ID failed, err is ", err.Error())
 				return false, nil, err
 			}
@@ -134,7 +135,8 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 				for i := range replyresource {
 					for j := range replyresource[i].Material {
 						if replyresource[i].Material[j].Type == 1 {
-							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
+							replyresource[i].Material[j].Data = strings.ReplaceAll(replyresource[i].Material[j].Data, "{{@新人}}", "@"+nameContent[0])
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
 						}
 					}
 				}
@@ -142,7 +144,7 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 				for i := range replyresource {
 					for j := range replyresource[i].Material {
 						if replyresource[i].Material[j].Type == 1 {
-							replyresource[i].Material[j].Data = fmt.Sprintf("@%s\n%s", nameContent[0], replyresource[i].Material[j].Data)
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s\n\n%s", nameContent[0], replyresource[i].Material[j].Data)
 						}
 					}
 				}
@@ -159,7 +161,7 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 		}
 	}
 	var fuzzWords []*FuzzWord
-	if num, err = o.QueryTable(new(FuzzWord)).Filter("Question__KeyWords__ID", id).All(&fuzzWords, "Word"); err != nil {
+	if num, err = o.QueryTable(new(FuzzWord)).Filter("Question__KeyWords__ID", id).All(&fuzzWords); err != nil {
 		logs.Error("KeyWordsService: get all FuzzWord by keyword ID failed, err is ", err.Error())
 		return false, nil, err
 	}
@@ -167,12 +169,13 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 	if num > 0 {
 		// 先模糊匹配(匹配到直接模糊匹配)
 		for _, fw := range fuzzWords {
-			if !strings.Contains(keyContent, fw.Word) {
+			fmt.Println(fw.Word, nameContent[1])
+			if !strings.Contains(fw.Word, nameContent[1]) {
 				continue
 			}
 			// 匹配到(查回复内容)
-			var question *Question
-			if err = o.QueryTable(new(Question)).Filter("FuzzWords__ID", fw.ID).One(question); err != nil {
+			var question Question
+			if err = o.QueryTable(new(Question)).Filter("FuzzWords__ID", fw.ID).One(&question); err != nil {
 				logs.Error("KeyWordsService: get question by FuzzWords__ID failed, err is ", err.Error())
 				return false, nil, err
 			}
@@ -190,7 +193,8 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 				for i := range replyresource {
 					for j := range replyresource[i].Material {
 						if replyresource[i].Material[j].Type == 1 {
-							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
+							replyresource[i].Material[j].Data = strings.ReplaceAll(replyresource[i].Material[j].Data, "{{@新人}}", "@"+nameContent[0])
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
 						}
 					}
 				}

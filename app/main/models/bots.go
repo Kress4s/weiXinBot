@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"weiXinBot/app/bridage/common"
+	"weiXinBot/app/bridage/grpc"
 	bridageModels "weiXinBot/app/bridage/models"
 
 	"github.com/astaxie/beego/logs"
@@ -18,6 +19,7 @@ func AddBot(bot *bridageModels.Bots) (id int64, err error) {
 		return 0, errors.New("添加机器人的wxid不能为空")
 	}
 	o := orm.NewOrm()
+	grpcToken := bot.Token
 	bot.Token = fmt.Sprintf("Bearer %s", bot.Token)
 	// 判断wxid不能为空；判断是否存在(是否请求)；存在更新；不存在新增；先是后端处理
 	if bridageModels.IsManagerNewBot(bot) {
@@ -34,10 +36,11 @@ func AddBot(bot *bridageModels.Bots) (id int64, err error) {
 		return
 	}
 	// 开启监听此微信号
-	// botWork := grpc.NewBotWorker()
-	// botWork.PrepareParams(bot.Token, botWork.BotID)
+	botWork := grpc.NewBotWorker()
+	fmt.Printf("bot token is %s\n", grpcToken)
+	botWork.PrepareParams(grpcToken, bot.WXID)
 	// goroutine 监听
-	// go botWork.Run()
+	go botWork.Run()
 	return
 }
 

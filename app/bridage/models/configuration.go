@@ -19,6 +19,16 @@ type Configuration struct {
 	ObjectIDS string `orm:"size(200);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
 }
 
+// MultiDealConfig ...
+type MultiDealConfig struct {
+	Type         int
+	FuncInfoList []struct {
+		BotWXID    string
+		Info       map[string]int64
+		ObjectsIDS string
+	}
+}
+
 func init() {
 	orm.RegisterModel(new(Configuration))
 }
@@ -63,6 +73,10 @@ func GroupService(message common.ProtoMessage) {
 			if parsesysmsg, err = common.PraseXMLString(message.Content.Str); err != nil {
 				logs.Error(err.Error())
 			}
+			if strings.Contains(parsesysmsg.SysmsgTemplate.ContenTemplate.Template, "kickoutname") {
+				continue
+			}
+			fmt.Println("解析成功")
 			var replyResource []*Resource
 			var isNeedServer bool
 			if isNeedServer, replyResource, err = WelcomeService(v.FuncID, message.PushContent); err != nil {

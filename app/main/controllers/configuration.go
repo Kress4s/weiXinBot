@@ -58,3 +58,22 @@ func (c *ConfigurationController) Put() {
 	}
 	err = models.UpdateConfigurationByID(&v)
 }
+
+// MultiUpdateAdd ...
+// @router /multiupdate [post]
+func (c *ConfigurationController) MultiUpdateAdd() {
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	var v bridageModels.MultiDealConfig
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
+		return
+	}
+	err = models.UpdateOrAddConfig(v)
+}

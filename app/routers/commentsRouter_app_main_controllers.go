@@ -79,6 +79,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:ConfigurationController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:ConfigurationController"],
+        beego.ControllerComments{
+            Method: "MultiUpdateAdd",
+            Router: "/multiupdate",
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"],
         beego.ControllerComments{
             Method: "Post",

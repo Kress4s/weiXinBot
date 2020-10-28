@@ -170,7 +170,7 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 		// 先模糊匹配(匹配到直接模糊匹配)
 		for _, fw := range fuzzWords {
 			fmt.Println(fw.Word, nameContent[1])
-			if !strings.Contains(fw.Word, nameContent[1]) {
+			if !strings.Contains(nameContent[1], fw.Word) {
 				continue
 			}
 			// 匹配到(查回复内容)

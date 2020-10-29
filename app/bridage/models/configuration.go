@@ -19,6 +19,14 @@ type Configuration struct {
 	ObjectIDS string `orm:"size(200);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
 }
 
+// GBGRelation ...
+type GBGRelation struct {
+	ID         int64  `orm:"auto;column(id)"`              //
+	GrouplanID int64  `orm:"column(grouplan_id)"`          //所属方案
+	BotWXID    string `orm:"column(bot_wxid)"`             //微信号
+	ObjectIDS  string `orm:"size(200);column(object_ids)"` //微信号下面的群号
+}
+
 // MultiDealConfig ...
 type MultiDealConfig struct {
 	Type         int
@@ -30,7 +38,7 @@ type MultiDealConfig struct {
 }
 
 func init() {
-	orm.RegisterModel(new(Configuration))
+	orm.RegisterModel(new(Configuration), new(GBGRelation))
 }
 
 // GroupIsNeedServer 查看此群是否需要机器人服务

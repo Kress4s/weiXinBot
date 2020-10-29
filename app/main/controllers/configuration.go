@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/common/base"
@@ -76,4 +77,53 @@ func (c *ConfigurationController) MultiUpdateAdd() {
 		return
 	}
 	err = models.UpdateOrAddConfig(v)
+}
+
+// GetConfigRelation ...
+// @router /configrelation [get]
+func (c *ConfigurationController) GetConfigRelation() {
+	var grouplanID int64
+	var v interface{}
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		}
+		c.ServeJSON()
+	}()
+	if grouplanID, err = c.GetInt64("grouplan"); err != nil || grouplanID == 0 {
+		err = fmt.Errorf("grouplan cant be null")
+		return
+	}
+	v, err = models.GetConfigRelation(grouplanID)
+}
+
+// MulitUpdateConfigRelation ...
+// @router /updateconfigRelation [post]
+func (c *ConfigurationController) MulitUpdateConfigRelation() {
+	type ConfigRelations struct {
+		Data []bridageModels.GBGRelation
+	}
+	var grouplanID int64
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	if grouplanID, err = c.GetInt64("grouplan"); err != nil || grouplanID == 0 {
+		err = fmt.Errorf("grouplan cant be null")
+		return
+	}
+	WXIDS := c.GetString("wxid")
+	var configrelation ConfigRelations
+	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &configrelation); err != nil {
+		return
+	}
+	err = models.UpdateConfigRelation(configrelation.Data, WXIDS, grouplanID)
 }

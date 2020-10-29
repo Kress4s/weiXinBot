@@ -69,3 +69,50 @@ func UpdateOrAddConfig(m bridageModels.MultiDealConfig) (err error) {
 	}
 	return
 }
+
+// GetConfigRelation ...
+func GetConfigRelation(grouplanID int64) (ret interface{}, err error) {
+	o := orm.NewOrm()
+	var l []bridageModels.GBGRelation
+	if _, err = o.QueryTable(new(bridageModels.GBGRelation)).Filter("GrouplanID", grouplanID).All(&l); err != nil {
+		logs.Error("Get ConfigRelation failed, err is ", err.Error())
+		return nil, err
+	}
+	return l, nil
+}
+
+// UpdateConfigRelation ...
+func UpdateConfigRelation(m []bridageModels.GBGRelation, WXID string, grouplanID int64) (err error) {
+	o := orm.NewOrm()
+	defer func() {
+		if err == nil {
+			o.Commit()
+		} else {
+			o.Rollback()
+		}
+	}()
+	if len(WXID) != 0 {
+		if _, err = o.QueryTable(new(bridageModels.GBGRelation)).Filter("GrouplanID", grouplanID).Filter("BotWXID", WXID).Delete(); err != nil {
+			logs.Error("delete config  group wxid failed, err is ", err.Error())
+			return
+		}
+	}
+	for _, v := range m {
+		var _v = bridageModels.GBGRelation{GrouplanID: v.GrouplanID, BotWXID: v.BotWXID}
+		if err = o.Read(&_v, "GrouplanID", "BotWXID"); err != nil {
+			if err == orm.ErrNoRows {
+				if _, err = o.Insert(&v); err != nil {
+					logs.Error("GetConfigRelation: insert GrouplanWXRelation failed, err is ", err.Error())
+					return
+				}
+			}
+		} else {
+			v.ID = _v.ID
+			if _, err = o.Update(&v, "ObjectIDS"); err != nil {
+				logs.Error("GetConfigRelation: update GrouplanWXRelation failed, err is ", err.Error())
+				return
+			}
+		}
+	}
+	return
+}

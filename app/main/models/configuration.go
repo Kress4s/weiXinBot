@@ -2,6 +2,7 @@ package models
 
 import (
 	"strconv"
+	"strings"
 	bridageModels "weiXinBot/app/bridage/models"
 
 	"github.com/astaxie/beego/logs"
@@ -93,7 +94,8 @@ func UpdateConfigRelation(m []bridageModels.GBGRelation, WXID string, grouplanID
 	}()
 	o.Begin()
 	if len(WXID) != 0 {
-		if _, err = o.QueryTable(new(bridageModels.GBGRelation)).Filter("GrouplanID", grouplanID).Filter("BotWXID", WXID).Delete(); err != nil {
+		WXIDSlice := strings.Split(WXID, ",")
+		if _, err = o.QueryTable(new(bridageModels.GBGRelation)).Filter("GrouplanID", grouplanID).Filter("BotWXID__in", WXIDSlice).Delete(); err != nil {
 			logs.Error("delete config  group wxid failed, err is ", err.Error())
 			return
 		}

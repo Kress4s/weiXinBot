@@ -126,3 +126,9 @@ const (
 	AUTH_CODE = "authCode"
 	AUTH_PWD  = "authPwd"
 )
+
+// 定时任务状态
+const (
+	UN_SEND = "unSend" // 未发送
+	SENDED  = "sended" // 已发送
+)

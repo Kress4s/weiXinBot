@@ -81,7 +81,7 @@ func UpdateBotByWXID(m *Bots) (err error) {
 // IsManagerNewBot 判断该用户下是否存在过这个机器人
 func IsManagerNewBot(m *Bots) (isExist bool) {
 	o := orm.NewOrm()
-	if !o.QueryTable(new(Bots)).Filter("WXID", m.WXID).Filter("Manager", m.Manager).Exist() {
+	if !o.QueryTable(new(Bots)).Filter("WXID", m.WXID).Exist() {
 		return false
 	}
 	return true

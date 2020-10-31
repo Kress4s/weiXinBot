@@ -26,6 +26,9 @@ func GetGouplanByID(id int64) (v *bridageModels.GroupPlan, err error) {
 		return nil, err
 	}
 	o.LoadRelated(v, "Groups")
+	for i := range v.Groups {
+		o.QueryTable(new(bridageModels.Group)).Filter("ID", v.Groups[i].ID).RelatedSel("Bots").One(v.Groups[i])
+	}
 	return v, nil
 }
 

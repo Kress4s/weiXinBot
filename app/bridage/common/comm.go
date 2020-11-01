@@ -49,12 +49,13 @@ type DetailGroupInfo struct {
 // WxSysMsg 目前踢人和新人入群发送的消息通知
 type WxSysMsg struct {
 	XMLName        xml.Name `xml:"sysmsg"`
+	Type           string   `xml:"type,attr"`
 	SysmsgTemplate struct {
 		ContenTemplate struct {
 			// Plain    string `xml:"plain"`
 			Template string `xml:"template"`
 			Linklist struct {
-				Link []struct {
+				Link struct {
 					Type       string `xml:"name,attr"` //新人入群：adder；踢人：kickoutname
 					MemberList struct {
 						Member []struct {

@@ -72,14 +72,13 @@ func GroupService(message common.ProtoMessage) {
 		// is welcome function config
 		case 1:
 			//确定新人进群的数据结构再做处理
-			// 当前文本消息的类型是 MesType = 10002
-			if message.MsgType != 10002 {
-				continue
-			}
-			fmt.Println("有新人进来的消息")
 			var parsesysmsg *common.WxSysMsg
 			if parsesysmsg, err = common.PraseXMLString(message.Content.Str); err != nil {
 				logs.Error(err.Error())
+			}
+			// 当前文本消息的类型是 MesType = 10002 现在接入语音也是
+			if message.MsgType != 10002 && parsesysmsg.Type != "sysmsgtemplate" {
+				continue
 			}
 			if strings.Contains(parsesysmsg.SysmsgTemplate.ContenTemplate.Template, "kickoutname") {
 				continue
@@ -98,7 +97,7 @@ func GroupService(message common.ProtoMessage) {
 							//回复的文字内容
 							logs.Info("开始发送文字...")
 							if strings.Contains(_rM.Data, "{{@新人}}") {
-								var newAtData = fmt.Sprintf("@%s", parsesysmsg.SysmsgTemplate.ContenTemplate.Linklist.Link[0].MemberList.Member[0].NickName)
+								var newAtData = fmt.Sprintf("@%s", parsesysmsg.SysmsgTemplate.ContenTemplate.Linklist.Link.MemberList.Member[0].NickName)
 								_rM.Data = strings.ReplaceAll(_rM.Data, "{{@新人}}", newAtData)
 							}
 							if err = SendText(message.ToUserName.Str, message.FromUserName.Str, _rM.Data); err != nil {

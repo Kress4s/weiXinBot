@@ -213,3 +213,21 @@ func (c *GrouPlanController) GetPlanFuncSwitch() {
 	id, _ := strconv.ParseInt(idStr, 0, 64)
 	v, err = bridageModels.GetGrouPlanFuncSwitch(id)
 }
+
+// GetPlanFuncID ...
+// @router /getfuncinfo/:grouplanid [get]
+func (c *GrouPlanController) GetPlanFuncID() {
+	var v interface{}
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		}
+		c.ServeJSON()
+	}()
+	idStr := c.Ctx.Input.Param(":grouplanid")
+	id, _ := strconv.ParseInt(idStr, 0, 64)
+	v, err = bridageModels.GetGrouplainFuncInfo(id)
+}

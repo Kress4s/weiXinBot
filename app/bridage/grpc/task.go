@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sync"
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/constant"
 	pb "weiXinBot/app/bridage/grpc/proto"
@@ -28,22 +27,22 @@ const (
 	Address string = constant.GRPC_BASE_URL
 )
 
-var conn *grpc.ClientConn // 一个连接
-var lock sync.Mutex
+// var conn *grpc.ClientConn // 一个连接
+// var lock sync.Mutex
 
 // GetConnInstance 获取连接
-func GetConnInstance() (*grpc.ClientConn, error) {
-	var err error
-	lock.Lock()
-	defer lock.Unlock()
-	if conn == nil {
-		if conn, err = grpc.Dial(Address, grpc.WithInsecure()); err != nil {
-			logs.Error("create grpc conn failed, err is ", err.Error())
-			return nil, err
-		}
-	}
-	return conn, nil
-}
+// func GetConnInstance() (*grpc.ClientConn, error) {
+// 	var err error
+// 	lock.Lock()
+// 	defer lock.Unlock()
+// 	if conn == nil {
+// 		if conn, err = grpc.Dial(Address, grpc.WithInsecure()); err != nil {
+// 			logs.Error("create grpc conn failed, err is ", err.Error())
+// 			return nil, err
+// 		}
+// 	}
+// 	return conn, nil
+// }
 
 // NewBotWorker ...
 func NewBotWorker() *BotWorker {
@@ -70,12 +69,17 @@ func (c *BotWorker) Run() {
 			4. 通过websoket方式通知web端掉线的微信号
 		*/
 		cancle() //通知所有的goroutine退出
-		// if err = bridageModels.UpdateBotLoginStatusByWXID(c.BotID); err == nil {
-		// 	logs.Info("%s has offlined, please check it to relogin", c.BotID)
-		// }
+		if err = bridageModels.UpdateBotLoginStatusByWXID(c.BotID); err == nil {
+			logs.Info("%s has offlined, please check it to relogin", c.BotID)
+		}
 		// wetsocket 通知前端
 
 	}()
+	var conn *grpc.ClientConn
+	if conn, err = grpc.Dial(Address, grpc.WithInsecure()); err != nil {
+		logs.Error("create grpc conn failed, err is ", err.Error())
+		return
+	}
 	grpcClient := pb.NewRockRpcServerClient(conn)
 	req := pb.StreamRequest{
 		Token: &c.Token,
@@ -87,7 +91,10 @@ func (c *BotWorker) Run() {
 	for {
 		var message common.ProtoMessage
 		fmt.Println("开始监控")
-		response, _ := res.Recv()
+		response, verr := res.Recv()
+		if verr != nil {
+			break
+		}
 		if err = json.Unmarshal([]byte(*response.Payload), &message); err == nil {
 			// 开始执行监控操作(后期对message进行类型的解析，避免开启多余的goroutine资源)
 			// 目前只需要处理
@@ -105,6 +112,7 @@ func (c *BotWorker) Run() {
 			}
 		} else {
 			logs.Error("json Unmarshal meaasge failed, err is ", err.Error())
+			break
 		}
 		/*
 			TODO:处理信息内容
@@ -136,14 +144,14 @@ func BeginServer(ctx context.Context, message common.ProtoMessage) {
 }
 
 // CloseConn 关闭
-func (c *BotWorker) CloseConn() {
-	conn.Close()
-}
+// func (c *BotWorker) CloseConn() {
+// 	conn.Close()
+// }
 
-func init() {
-	var err error
-	conn, err = GetConnInstance()
-	if err != nil {
-		panic(fmt.Errorf("get gRPC intance faield,err is %s", err.Error()))
-	}
-}
+// func init() {
+// 	var err error
+// 	conn, err = GetConnInstance()
+// 	if err != nil {
+// 		panic(fmt.Errorf("get gRPC intance faield,err is %s", err.Error()))
+// 	}
+// }

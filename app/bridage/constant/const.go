@@ -129,6 +129,7 @@ const (
 
 // 定时任务状态
 const (
-	UN_SEND = "unSend" // 未发送
-	SENDED  = "sended" // 已发送
+	UN_SEND    = "unSend"     // 未发送
+	SENDED     = "sended"     // 已发送
+	FAILEDSEND = "sendfailed" // 发送失败
 )

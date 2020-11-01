@@ -162,6 +162,15 @@ func init() {
 
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"],
         beego.ControllerComments{
+            Method: "GetPlanFuncID",
+            Router: "/getfuncinfo/:grouplanid",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"],
+        beego.ControllerComments{
             Method: "GetPlanFuncSwitch",
             Router: "/getswitchs/:id",
             AllowHTTPMethods: []string{"get"},
@@ -471,6 +480,15 @@ func init() {
             Method: "GetAllResourceByIds",
             Router: "/getResourcesByIds",
             AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: "/",
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

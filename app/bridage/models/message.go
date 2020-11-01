@@ -78,7 +78,7 @@ func SendText(At, To, Content string) (err error) {
 	sendText.Content = Content
 	res, verr := httplib.Post(constant.SEND_TEXT).Header(constant.H_AUTHORIZATION, bot.Token).JSONBody(&sendText)
 	if verr != nil {
-		logs.Error("send ")
+		logs.Error("[%+v] send message to [%s] faield, err is %s", sendText.At, sendText.To, err.Error())
 		return verr
 	}
 	var response common.StandardRestResult

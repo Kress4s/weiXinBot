@@ -137,6 +137,9 @@ func GetAllGrouplan(querys []*common.QueryConditon, fields []string, sortby []st
 		if len(fields) == 0 {
 			for _, v := range l {
 				o.LoadRelated(&v, "Groups")
+				for i := range v.Groups {
+					o.QueryTable(new(bridageModels.Group)).Filter("ID", v.Groups[i].ID).RelatedSel("Bots").One(v.Groups[i])
+				}
 				ml = append(ml, v)
 			}
 		} else {

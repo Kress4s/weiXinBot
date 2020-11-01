@@ -89,3 +89,26 @@ func GetGrouPlanFuncSwitch(grouplanID int64) (ret map[int]int, err error) {
 	}
 	return m, nil
 }
+
+// GetGrouplainFuncInfo ...获取grouplan下面所有配置类型和信息
+func GetGrouplainFuncInfo(grouplanID int64) (ret map[string]int64, err error) {
+	var wel Welcome
+	var keyword KeyWords
+	// var autokick AutoKickx
+	// var whitelist WhiteList
+	m := make(map[string]int64)
+	o := orm.NewOrm()
+	if err = o.QueryTable(new(Welcome)).Filter("GroupPlan__ID", grouplanID).One(&wel); err == nil {
+		m["1"] = wel.ID
+	}
+
+	if err = o.QueryTable(new(KeyWords)).Filter("GroupPlan__ID", grouplanID).One(&keyword); err == nil {
+		m["2"] = keyword.ID
+	}
+	// 自动踢人
+	// m["3"] = -1
+
+	// 白名单
+	// m["4"] = -1
+	return m, nil
+}

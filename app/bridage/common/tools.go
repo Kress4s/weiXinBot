@@ -38,6 +38,11 @@ func EncodeMD5(value string) string {
 // PraseXMLString ...
 // 解析XML的内容 content->  21592794431@chatroom:xml
 func PraseXMLString(content string) (wxsysmsg *WxSysMsg, err error) {
+	defer func() {
+		if verr := recover(); verr != nil {
+			fmt.Println(verr)
+		}
+	}()
 	var conSlice []string
 	if conSlice = strings.SplitN(content, ":", 2); len(conSlice) < 2 {
 		err = fmt.Errorf("PraseXMLString contentfromproto[%s] is not right, please cheack it", content)

@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 )
@@ -27,6 +29,9 @@ func GetManagerByAccount(tel string) (ret *Manager, err error) {
 	if err = o.QueryTable(new(Manager)).Filter("Tel", tel).One(&v); err == nil {
 		o.LoadRelated(&v, "Bots")
 		return &v, nil
+	} else if err == orm.ErrNoRows {
+		err = fmt.Errorf("账号或密码错误")
+		return nil, err
 	}
 	logs.Error("Get manager by account failed, err is ", err.Error())
 	return nil, err

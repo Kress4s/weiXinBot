@@ -23,6 +23,9 @@ func AddBot(bot *bridageModels.Bots) (id int64, err error) {
 	bot.Token = fmt.Sprintf("Bearer %s", bot.Token)
 	// 判断wxid不能为空；判断是否存在(是否请求)；存在更新；不存在新增；先是后端处理
 	if bridageModels.IsManagerNewBot(bot) {
+		if err = StartListenGRPC(grpcToken, bot.WXID); err != nil {
+			return
+		}
 		// update bot info
 		if err = bridageModels.UpdateBotByWXID(bot); err != nil {
 			logs.Error("when add bot interface update bot accured error, err is ", err.Error())
@@ -30,18 +33,48 @@ func AddBot(bot *bridageModels.Bots) (id int64, err error) {
 		}
 		// 这里存在id返回0的不准确的问题，暂时搁置，不影响
 	} else {
+		if err = StartListenGRPC(grpcToken, bot.WXID); err != nil {
+			return
+		}
 		if id, err = o.Insert(bot); err != nil {
 			return 0, err
 		}
 		return
 	}
-	// 开启监听此微信号
-	botWork := grpc.NewBotWorker()
-	fmt.Printf("bot token is %s\n", grpcToken)
-	botWork.PrepareParams(grpcToken, bot.WXID)
-	// goroutine 监听
-	go botWork.Run()
 	return
+}
+
+// StartListenGRPC ...
+func StartListenGRPC(grpcToken, WXID string) (err error) {
+	var isNeed bool
+	if isNeed, err = IsNeedRestart(WXID); err != nil {
+		logs.Error("grpc %s failed, err is %s", WXID, err.Error())
+		return err
+	}
+	if isNeed {
+		// 开启监听此微信号
+		botWork := grpc.NewBotWorker()
+		fmt.Printf("bot token is %s\n", grpcToken)
+		botWork.PrepareParams(grpcToken, WXID)
+		// goroutine 监听
+		go botWork.Run()
+	}
+	return
+}
+
+// IsNeedRestart ...
+func IsNeedRestart(WXID string) (bool, error) {
+	o := orm.NewOrm()
+	var err error
+	var bot = bridageModels.Bots{WXID: WXID}
+	if err = o.Read(&bot, "WXID"); err == nil {
+		if bot.LoginStatus == 0 {
+			return true, nil
+		} else if err == orm.ErrNoRows {
+			return true, nil
+		}
+	}
+	return false, err
 }
 
 // GetBotByID ...

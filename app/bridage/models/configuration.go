@@ -75,15 +75,18 @@ func GroupService(message common.ProtoMessage) {
 			var parsesysmsg *common.WxSysMsg
 			if parsesysmsg, err = common.PraseXMLString(message.Content.Str); err != nil {
 				logs.Error(err.Error())
+				continue
 			}
 			// 当前文本消息的类型是 MesType = 10002 现在接入语音也是
+			if parsesysmsg != nil {
+				continue
+			}
 			if message.MsgType != 10002 && parsesysmsg.Type != "sysmsgtemplate" {
 				continue
 			}
 			if strings.Contains(parsesysmsg.SysmsgTemplate.ContenTemplate.Template, "kickoutname") {
 				continue
 			}
-			fmt.Println("解析成功")
 			var replyResource []*Resource
 			var isNeedServer bool
 			if isNeedServer, replyResource, err = WelcomeService(v.FuncID, message.PushContent); err != nil {
@@ -127,6 +130,7 @@ func GroupService(message common.ProtoMessage) {
 			var isNeedServer bool
 			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.Content.Str); err != nil {
 				logs.Error("KeyWordsService failed, err is ", err.Error())
+				continue
 			} else if isNeedServer && err == nil {
 				logs.Info("找到问题库...开始查找资源...")
 				for _, _rR := range replyResource {

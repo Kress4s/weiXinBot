@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/constant"
 	pb "weiXinBot/app/bridage/grpc/proto"
 	bridageModels "weiXinBot/app/bridage/models"
 
+	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/orm"
 	"google.golang.org/grpc"
 )
 
@@ -141,6 +144,49 @@ func BeginServer(ctx context.Context, message common.ProtoMessage) {
 			bridageModels.GroupService(message)
 		}
 	}
+}
+
+// RebotWX ...
+func RebotWX() {
+	var limit = 50 //每次取50条
+	var count = 0
+	var err error
+	o := orm.NewOrm()
+	for {
+		var bots []*bridageModels.Bots
+		if _, err = o.QueryTable(new(bridageModels.Bots)).Filter("LoginStatus", 1).Limit(limit, count*limit).All(&bots, "ID", "Token", "WXID"); err != nil {
+			logs.Error("rebot failed, err is ", err.Error())
+			break
+		}
+		if len(bots) == 0 {
+			break
+		}
+		for _, v := range bots {
+			var req *httplib.BeegoHTTPRequest
+			var res common.StandardRestResult
+			if req = httplib.Get(constant.LOGIN_HEART_URL).Header(constant.H_AUTHORIZATION, v.Token); err == nil {
+				if err = req.ToJSON(&res); err == nil {
+					if res.Code == 0 {
+						// 开启监听此微信号
+						botWork := NewBotWorker()
+						botWork.PrepareParams(strings.SplitN(v.Token, " ", 2)[1], v.WXID)
+						// goroutine 监听
+						go botWork.Run()
+					} else {
+						v.LoginStatus = 0
+						o.Update(v, "LoginStatus")
+						fmt.Println(v.WXID, "不在线")
+					}
+				}
+			}
+		}
+		count++
+	}
+}
+
+// 重启所有微信
+func init() {
+	RebotWX()
 }
 
 // CloseConn 关闭

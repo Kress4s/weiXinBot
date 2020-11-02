@@ -17,6 +17,7 @@ type TimeTask struct {
 	Status     string    `orm:"size(20);column(status)"`               // 任务状态(UnSend;Sended;)
 	SetUpTime  time.Time `orm:"type(datetime);column(setuptime);null"` // 设置发送时间
 	Resource   string    `orm:"size(20);column(resource)"`             // 发送内容(多个)
+	Remark     string    `orm:"size(50);column(remark)"`               // 任务备注
 }
 
 // func init() {

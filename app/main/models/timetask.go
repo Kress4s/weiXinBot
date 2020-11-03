@@ -12,7 +12,7 @@ import (
 // AddTimeTask ...
 func AddTimeTask(m *bridageModels.TimeTask) (id int64, err error) {
 	o := orm.NewOrm()
-	if m.Type == -1 {
+	if m.SendType == -1 {
 		// 立即推送
 		if err = bridageModels.SendImmediately(m); err != nil {
 			logs.Error("[%s] SendImmediately failed, err is ", m.BotWXID)
@@ -23,7 +23,7 @@ func AddTimeTask(m *bridageModels.TimeTask) (id int64, err error) {
 		id, err = o.Insert(m)
 	} else {
 		if err = bridageModels.TimingSend(m); err != nil {
-			logs.Error("[%s] TimingSend failed, err is ", m.BotWXID)
+			logs.Error("[%s] TimingSend failed, err is ", m.BotWXID, err.Error())
 			m.Status = constant.FAILEDSEND
 		}
 		m.Status = constant.SENDED

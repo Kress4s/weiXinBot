@@ -128,8 +128,8 @@ func GroupService(message common.ProtoMessage) {
 			fmt.Println("开启关键词查询服务..")
 			var replyResource []*Resource
 			var isNeedServer bool
-			// if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.Content.Str); err != nil {
-			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.PushContent); err != nil {
+			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.Content.Str); err != nil {
+				// if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.PushContent); err != nil {
 				logs.Error("KeyWordsService failed, err is ", err.Error())
 				continue
 			} else if isNeedServer && err == nil {

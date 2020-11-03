@@ -4,25 +4,28 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/astaxie/beego/orm"
 )
 
 // TimeTask 定时任务
 type TimeTask struct {
 	ID         int64     `orm:"auto;column(id)"`                       //
-	Title      string    `orm:"size(30);column(title)"`                // 推送内容的标题
-	Switch     bool      `orm:"column(switch)"`                        // 开关
-	Type       int       `orm:"column(type)"`                          // 类型(-1:立刻推送;0:单次执行;1:按天发送;2:按周发送;3:按月发送;)
+	Title      string    `orm:"size(50);column(title)"`                // 推送内容的标题
+	Switch     bool      `orm:"column(switch);default(1)"`             // 开关
+	Interval   int       `orm:"column(interval)"`                      //发送的间隔时间
+	SendType   int       `orm:"column(tasktype)"`                      // 类型(-1:立刻推送;0:单次执行;1:按天发送;2:按周发送;3:按月发送;)
 	BotWXID    string    `orm:"size(30);column(botwxid)"`              //
-	ObjectsIDS string    `orm:"size(300);column(objects)"`             // 群组或者联系人
+	ObjectsIDS string    `orm:"size(300);column(objectids)"`           // 群组或者联系人
 	Status     string    `orm:"size(20);column(status)"`               // 任务状态(UnSend;Sended;)
 	SetUpTime  time.Time `orm:"type(datetime);column(setuptime);null"` // 设置发送时间
 	Resource   string    `orm:"size(20);column(resource)"`             // 发送内容(多个)
 	Remark     string    `orm:"size(50);column(remark)"`               // 任务备注
 }
 
-// func init() {
-// 	orm.RegisterModel(new(TimeTask))
-// }
+func init() {
+	orm.RegisterModel(new(TimeTask))
+}
 
 // SendImmediately 立即推送
 func SendImmediately(tt *TimeTask) (err error) {
@@ -49,8 +52,8 @@ func SendImmediately(tt *TimeTask) (err error) {
 						if err = SendText(tt.BotWXID, st, m.Data); err != nil {
 							return
 						}
-						// 停0.5秒
-						time.Sleep(500 * time.Microsecond)
+						// 停 Interval 秒
+						time.Sleep(time.Duration(tt.Interval) * time.Second)
 					}
 				case 2:
 					// 图片信息
@@ -59,7 +62,7 @@ func SendImmediately(tt *TimeTask) (err error) {
 							return
 						}
 						// 停0.5秒
-						time.Sleep(500 * time.Microsecond)
+						time.Sleep(time.Duration(tt.Interval) * time.Second)
 					}
 				default:
 					fmt.Println("未定义类型")
@@ -81,7 +84,7 @@ func TimingSend(tt *TimeTask) (err error) {
 	if resources, err = GetResourceByIds(tt.Resource); err == nil && len(resources) > 0 {
 		for _, r := range resources {
 			for _, _m := range r.Material {
-				switch tt.Type {
+				switch tt.SendType {
 				case 0:
 					fmt.Println("单次执行")
 					fmt.Println(_m.Data)

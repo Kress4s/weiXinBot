@@ -43,6 +43,9 @@ func init() {
 		beego.NSNamespace("/config",
 			beego.NSInclude(&controllers.ConfigurationController{}),
 		),
+		beego.NSNamespace("/timetask",
+			beego.NSInclude(&controllers.TimeTaskController{}),
+		),
 	)
 	beego.AddNamespace(ns1)
 }

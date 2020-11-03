@@ -11,6 +11,7 @@ import (
 // 素材库(单个组)
 type Resource struct {
 	ID       int64       `orm:"auto;column(id)"`              //
+	Title    string      `orm:"size(30);column(title)"`       //素材标题
 	IsPublic int         `orm:"column(is_public);default(0)"` //资源是否是公有（区分素材公共库展示和增加方案功能的具体回复内容）
 	Material []*Material `orm:"reverse(many)"`                //
 	Manager  string      `orm:"size(30);column(manager)"`     //属于哪个用户的素材库(用户Tel)

@@ -78,10 +78,10 @@ func GroupService(message common.ProtoMessage) {
 				continue
 			}
 			// 当前文本消息的类型是 MesType = 10002 现在接入语音也是
-			if parsesysmsg != nil {
+			if parsesysmsg == nil {
 				continue
 			}
-			if message.MsgType != 10002 && parsesysmsg.Type != "sysmsgtemplate" {
+			if message.MsgType == 10002 && parsesysmsg.Type != "sysmsgtemplate" {
 				continue
 			}
 			if strings.Contains(parsesysmsg.SysmsgTemplate.ContenTemplate.Template, "kickoutname") {
@@ -128,7 +128,8 @@ func GroupService(message common.ProtoMessage) {
 			fmt.Println("开启关键词查询服务..")
 			var replyResource []*Resource
 			var isNeedServer bool
-			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.Content.Str); err != nil {
+			// if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.Content.Str); err != nil {
+			if isNeedServer, replyResource, err = KeyWordsService(v.FuncID, message.PushContent); err != nil {
 				logs.Error("KeyWordsService failed, err is ", err.Error())
 				continue
 			} else if isNeedServer && err == nil {

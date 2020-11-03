@@ -7,8 +7,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
-
-	"github.com/astaxie/beego/logs"
 )
 
 const (
@@ -50,7 +48,7 @@ func PraseXMLString(content string) (wxsysmsg *WxSysMsg, err error) {
 	}
 	var sysmsg WxSysMsg
 	if err = xml.Unmarshal([]byte(conSlice[1]), &sysmsg); err != nil {
-		logs.Error("xml.Unmarshal failed, err is ", err.Error())
+		// logs.Error("xml.Unmarshal failed, err is ", err.Error())
 		return nil, err
 	}
 	return &sysmsg, nil

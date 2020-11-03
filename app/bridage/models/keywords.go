@@ -106,6 +106,7 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 		return false, nil, err
 	}
 	keyContent = strings.ReplaceAll(keyContent, "\n", "")
+	keyContent = strings.Replace(keyContent, " ", "", -1)
 	nameContent := strings.Split(keyContent, ":")
 	// 设置了精准关键词
 	if num > 0 {
@@ -136,7 +137,7 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 					for j := range replyresource[i].Material {
 						if replyresource[i].Material[j].Type == 1 {
 							replyresource[i].Material[j].Data = strings.ReplaceAll(replyresource[i].Material[j].Data, "{{@新人}}", "@"+nameContent[0])
-							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s %s\n\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
 						}
 					}
 				}
@@ -194,7 +195,7 @@ func KeyWordsService(id int64, keyContent string) (isNeedReply bool, replyConten
 					for j := range replyresource[i].Material {
 						if replyresource[i].Material[j].Type == 1 {
 							replyresource[i].Material[j].Data = strings.ReplaceAll(replyresource[i].Material[j].Data, "{{@新人}}", "@"+nameContent[0])
-							replyresource[i].Material[j].Data = fmt.Sprintf("@%s%s\n\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
+							replyresource[i].Material[j].Data = fmt.Sprintf("@%s %s\n\n%s", nameContent[0], nameContent[1], replyresource[i].Material[j].Data)
 						}
 					}
 				}

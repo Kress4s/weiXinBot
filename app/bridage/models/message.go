@@ -101,7 +101,7 @@ func SendImage(At, To, Content string) (err error) {
 	if bot, err = GetBotByWXID(At); err != nil {
 		return
 	}
-	resp, verr := httplib.Get(constant.SEND_TEXT).Header(constant.H_AUTHORIZATION, bot.Token).Param("to", To).Param("url", Content).DoRequest()
+	resp, verr := httplib.Get(constant.SEND_IMAGE).Header(constant.H_AUTHORIZATION, bot.Token).Param("to", To).Param("url", Content).DoRequest()
 	if verr != nil {
 		logs.Error("send image[%s] to[%s] failed, err is ", Content, To)
 		return verr

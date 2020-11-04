@@ -133,3 +133,8 @@ const (
 	SENDED     = "sended"     // 已发送
 	FAILEDSEND = "sendfailed" // 发送失败
 )
+
+const (
+	MESSAGE_TASK      = "messagetask"
+	ANNOUNCEMENT_TASK = "announcementask"
+)

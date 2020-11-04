@@ -63,6 +63,12 @@ type SendImageMessage struct {
 	Token string //发送者的token
 }
 
+// AnnounceMessage 发送公告
+type AnnounceMessage struct {
+	Announcement string `json:"announcement"`
+	GroupID      string `json:"group_id"`
+}
+
 // SendText ...
 // @Param At: send wxid(origin WXID or modified wxid); To: received wxid ; content: send content
 // @Param proto method [post]
@@ -114,6 +120,34 @@ func SendImage(At, To, Content string) (err error) {
 	if err = json.Unmarshal(body, &response); err != nil {
 		logs.Error("SendImage: json Unmarshal failed, err is ", err.Error())
 		return
+	}
+	// 目前地底层发送成功和失败code都是0，没明确提示
+	if response.Code != 0 {
+		logs.Error("send message[%s] to receiver[%s] failed, err is ", Content, To, err.Error())
+		return err
+	}
+	return
+}
+
+// SendAnnouncement ...
+// @Param At: send wxid(origin WXID or modified wxid); content: send content
+// @Param proto method [get]
+func SendAnnouncement(At, To, Content string) (err error) {
+	var bot *Bots
+	if bot, err = GetBotByWXID(At); err != nil {
+		return
+	}
+	announce := new(AnnounceMessage)
+	announce.Announcement = Content
+	announce.GroupID = To
+	res, verr := httplib.Post(constant.SEND_TEXT).Header(constant.H_AUTHORIZATION, bot.Token).JSONBody(&announce)
+	if verr != nil {
+		logs.Error("[%+v] send message to [%s] faield, err is %s", bot.WXID, announce.GroupID, err.Error())
+		return verr
+	}
+	var response common.StandardRestResult
+	if err = res.ToJSON(&response); err != nil {
+		logs.Error("ToJSON: send text interface response failed, err is", err.Error())
 	}
 	// 目前地底层发送成功和失败code都是0，没明确提示
 	if response.Code != 0 {

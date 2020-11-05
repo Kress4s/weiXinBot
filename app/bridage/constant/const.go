@@ -18,6 +18,8 @@ const (
 const (
 	P_DEVICE_ID = "device_id"
 	P_UUID      = "uuid"
+	P_WXID      = "wx_id"
+	P_TOKEN     = "token"
 )
 
 // session

@@ -9,7 +9,6 @@ import (
 	"weiXinBot/app/bridage/common"
 	"weiXinBot/app/bridage/common/base"
 	"weiXinBot/app/bridage/constant"
-	bridage "weiXinBot/app/bridage/models"
 
 	"github.com/astaxie/beego/httplib"
 	"github.com/astaxie/beego/logs"
@@ -27,7 +26,7 @@ type IndexController struct {
 3. 目前无加密措施，后期安全性考虑加密
 */
 func (c *IndexController) GetQrCode() {
-	var deviceID string
+	var token string
 	var restBody common.StandardRestResult
 	var resp *http.Response
 	var err error
@@ -39,25 +38,25 @@ func (c *IndexController) GetQrCode() {
 		}
 		c.ServeJSON()
 	}()
+	if token = c.GetString(constant.P_TOKEN); token == "" {
+		err = fmt.Errorf("token cant be null")
+		return
+	}
+	token = fmt.Sprintf("Bearer %s", token)
 	wxID := c.GetString(constant.H_WXID)
 	if len(wxID) != 0 {
 		// 登录过
-		if deviceID, err = bridage.GetDeviceIDByWxID(wxID); err != nil {
-			logs.Error("GetDeviceIDByWxID failed, err is ", err.Error())
+		if resp, err = httplib.Get(constant.LOGIN_QRCODE_URL).Param(constant.P_WXID, wxID).Header(constant.H_AUTHORIZATION, token).DoRequest(); err != nil {
+			logs.Error("get URL[%s] failed, err is ", err.Error())
 			return
 		}
 	} else {
-		deviceID = c.GetString(constant.H_DEVID)
-		if len(deviceID) == 0 {
-			err = fmt.Errorf("header[%s] cant be null", constant.H_DEVID)
+		// 新微信号
+		if resp, err = httplib.Get(constant.LOGIN_QRCODE_URL).Header(constant.H_AUTHORIZATION, token).DoRequest(); err != nil {
+			logs.Error("get URL[%s] failed, err is ", err.Error())
 			return
 		}
 	}
-	if resp, err = httplib.Get(constant.LOGIN_QRCODE_URL).Param(constant.P_DEVICE_ID, deviceID).DoRequest(); err != nil {
-		logs.Error("get URL[%s] failed, err is ", err.Error())
-		return
-	}
-
 	var body []byte
 	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -68,15 +67,6 @@ func (c *IndexController) GetQrCode() {
 		logs.Error("json.Unmarshal qrcode failed, err is ", err.Error())
 		return
 	}
-	// session记录uuid和device的关系(更新user) conf配置session
-	// if err = c.Ctx.Input.CruSession.Set(constant.UUID, deviceID); err != nil {
-	// 	logs.Error("Set session[%s] failed, err is ", constant.UUID, err.Error())
-	// 	return
-	// }
-	// if isNeedAdd {
-	// 	// 把deviceID存进User表
-	// 	_, err = bridage.AddUserByDeviceID(deviceID)
-	// }
 }
 
 // Check ...
@@ -97,7 +87,12 @@ func (c *IndexController) Check() {
 	}
 	var restBody *restQRcode
 	var err error
-	UUID := c.GetString(constant.H_UUID)
+	var token string
+	if token = c.GetString(constant.P_TOKEN); token == "" {
+		err = fmt.Errorf("token is null")
+		return
+	}
+	token = fmt.Sprintf("Bearer %s", token)
 	qrFlag := c.GetString("flag")
 	defer func() {
 		if err == nil {
@@ -107,14 +102,10 @@ func (c *IndexController) Check() {
 		}
 		c.ServeJSON()
 	}()
-	if len(UUID) == 0 {
-		err = fmt.Errorf("uuid is null")
-		return
-	}
 	for {
 		var resp *http.Response
 		var verr error
-		if resp, verr = httplib.Get(constant.LOGIN_CHECK_URL).Param(constant.P_UUID, UUID).DoRequest(); verr != nil {
+		if resp, verr = httplib.Get(constant.LOGIN_CHECK_URL).Header(constant.H_AUTHORIZATION, token).DoRequest(); verr != nil {
 			logs.Error("get response[%s] failed, err is ", constant.LOGIN_CHECK_URL, verr.Error())
 			return
 		}

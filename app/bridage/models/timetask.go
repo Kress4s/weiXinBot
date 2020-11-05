@@ -41,7 +41,7 @@ type TimeTaskRecode struct {
 }
 
 func init() {
-	orm.RegisterModel(new(TimeTask))
+	orm.RegisterModel(new(TimeTask), new(TimeTaskRecode))
 }
 
 // AddTimeTaskRecode ...

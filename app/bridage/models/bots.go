@@ -19,7 +19,6 @@ type Bots struct {
 	Sex            bool       `orm:"column(sex)"`                                     //
 	Signature      string     `orm:"size(50);column(signature)"`                      //
 	Alias          string     `orm:"size(50);column(alias)"`                          // 自己设置的微信号
-	Device         string     `orm:"size(50);column(device)"`                         //
 	LoginStatus    int        `orm:"column(login_status)"`                            // 机器人登录状态
 	Status         int        `orm:"column(status)"`                                  // 机器人状态
 	LoginTime      time.Time  `orm:"auto_now;column(login_time);type(datetime)"`      //
@@ -42,25 +41,6 @@ func (u *Bots) TableUnique() [][]string {
 
 func init() {
 	orm.RegisterModel(new(Bots))
-}
-
-// GetDeviceIDByWxID ...
-func GetDeviceIDByWxID(wxid string) (deviceID string, err error) {
-	o := orm.NewOrm()
-	var user = Bots{WXID: wxid}
-	if err = o.Read(&user, "WXID"); err != nil {
-		logs.Error("get user by WXID failed, err is ", err.Error())
-		return "", err
-	}
-	return user.Device, nil
-}
-
-// AddUserByDeviceID ...
-func AddUserByDeviceID(deviceID string) (id int64, err error) {
-	o := orm.NewOrm()
-	user := Bots{Device: deviceID}
-	id, err = o.Insert(&user)
-	return
 }
 
 // UpdateBotByWXID ...

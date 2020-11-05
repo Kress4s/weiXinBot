@@ -36,6 +36,7 @@ type TimeTaskRecode struct {
 	ObjectsIDS string    `orm:"size(300);column(objectids)"`          // 群组或者联系人
 	SendTime   time.Time `orm:"type(datetime);column(sendtime);null"` // 设置发送时间
 	Status     string    `orm:"size(20);column(status)"`              // 任务状态(UnSend;Sended;)
+	Manager    string    `orm:"size(30);column(manager)"`             // 属于哪个用户的任务(用户Tel)
 	Remark     string    `orm:"size(50);column(remark)"`              // 任务备注
 }
 
@@ -156,6 +157,7 @@ func ExecuteTask(v TimeTask) (err error) {
 		tr.SendTime = time.Now()
 		tr.ObjectsIDS = v.ObjectsIDS
 		tr.BotWXID = v.BotWXID
+		tr.Manager = v.Manager
 		if err != nil {
 			tr.Status = constant.FAILEDSEND
 			tr.Remark = err.Error()

@@ -493,6 +493,51 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"],
+        beego.ControllerComments{
+            Method: "GetAll",
+            Router: "/",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"],
+        beego.ControllerComments{
+            Method: "GetOne",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"],
+        beego.ControllerComments{
+            Method: "Put",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"put"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"],
+        beego.ControllerComments{
+            Method: "Delete",
+            Router: "/:id",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:TimeTaskController"],
+        beego.ControllerComments{
+            Method: "GetAllTaksRecode",
+            Router: "/taskrecode",
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:WelcomeController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:WelcomeController"],
         beego.ControllerComments{
             Method: "Post",

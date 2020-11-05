@@ -40,7 +40,6 @@ func main() {
 	//设置日志规则
 	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"logs/beta.log","separate":["error", "warning", "notice", "info", "debug"]}`)
 	logs.EnableFuncCallDepth(true)
-	beego.SetStaticPath("/", "./static")
 	// beego.AddViewPath("template")
 	args := os.Args //获取用户输入的所有参数
 	if args == nil || len(args) < 2 {

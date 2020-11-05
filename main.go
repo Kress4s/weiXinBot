@@ -13,6 +13,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/plugins/cors"
+	"github.com/astaxie/beego/toolbox"
 )
 
 func main() {
@@ -50,6 +51,8 @@ func main() {
 		switch args[1] {
 		case "start":
 			//runtime.GOMAXPROCS(runtime.NumCPU()) // 预置运行规格协程信息
+			toolbox.StartTask()      // 开始全局定时任务
+			defer toolbox.StopTask() //
 			beego.Run()
 		case "orm":
 			orm.RunCommand()

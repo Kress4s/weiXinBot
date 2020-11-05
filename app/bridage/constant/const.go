@@ -131,7 +131,7 @@ const (
 const (
 	UN_SEND    = "unSend"     // 未发送
 	SENDED     = "sended"     // 已发送
-	FAILEDSEND = "sendfailed" // 发送失败
+	FAILEDSEND = "sendFailed" // 发送失败
 )
 
 const (

@@ -8,6 +8,8 @@ import (
 type TaskFactory interface {
 	SendImmediately(interface{}) error
 	TimingSend(interface{}) error
+	ModifyTimeTask(p interface{})
+	DeleteTimeTask(p interface{})
 }
 
 // TaskTypeMap ...

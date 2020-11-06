@@ -6,8 +6,10 @@ import (
 
 // TaskFactory ...
 type TaskFactory interface {
-	SendImmediately(interface{}) error
-	TimingSend(interface{}) error
+	TaskImmediately(interface{}) error
+	TaskGenerate(interface{}) error
+	TaskSetting(interface{}) error
+	TaskExcute(p interface{}) error
 	ModifyTimeTask(p interface{})
 	DeleteTimeTask(p interface{})
 }

@@ -25,9 +25,9 @@ func AddTimeTask(m *bridageModels.TimeTask) (id int64, err error) {
 	}
 	switch m.SendType {
 	case -1:
-		go timetasker.SendImmediately(*m)
+		go timetasker.TaskImmediately(*m)
 	default:
-		go timetasker.TimingSend(*m)
+		go timetasker.TaskSetting(*m)
 	}
 	return
 }

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"weiXinBot/app/bridage/constant"
 
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -142,84 +141,6 @@ func SetUpTimeFormatString(sendType int, setUpString string) (SetUpFormat string
 				return fmt.Sprintf("00 %s %s %s */1 *", hm[1], hm[0], reslice[0])
 			}
 		}
-	}
-	return
-}
-
-// ExecuteTask 执行消息任务的操作
-func ExecuteTask(v TimeTask) (err error) {
-	var resources []*Resource
-	var sendTo []string
-	defer func() {
-		tr := new(TimeTaskRecode)
-		tr.Type = v.Type
-		tr.Title = v.Title
-		tr.SendTime = time.Now()
-		tr.ObjectsIDS = v.ObjectsIDS
-		tr.BotWXID = v.BotWXID
-		tr.Manager = v.Manager
-		if err != nil {
-			tr.Status = constant.FAILEDSEND
-			tr.Remark = err.Error()
-		} else {
-			tr.Status = constant.SENDED
-			tr.Remark = "send successful"
-		}
-		AddTimeTaskRecode(tr)
-	}()
-	if sendTo = strings.Split(v.ObjectsIDS, ","); len(sendTo) == 0 {
-		err = fmt.Errorf("sendTo is null")
-		return
-	}
-	o := orm.NewOrm()
-	if resources, err = GetResourceByIds(v.Resource); err == nil {
-		for _, r := range resources {
-			for _, m := range r.Material {
-				switch m.Type {
-				case 1:
-					// 文本信息
-					for _, st := range sendTo {
-						switch v.Type {
-						case "message":
-							if err = SendText(v.BotWXID, st, m.Data); err != nil {
-								return
-							}
-						case "announcement":
-							if err = SendAnnouncement(v.BotWXID, st, m.Data); err != nil {
-								return
-							}
-						default:
-							logs.Info("未定义的任务类型")
-						}
-						// 停 Interval 秒
-						time.Sleep(time.Duration(v.Interval) * time.Second)
-					}
-				case 2:
-					// 图片信息
-					for _, st := range sendTo {
-						if err = SendImage(v.BotWXID, st, m.Data); err != nil {
-							var num int64
-							if num, err = o.Update(&v, "Status", "SetUpTime"); err == nil {
-								logs.Debug("Number of TimeTask update in database:", num)
-							}
-							return
-						}
-						// 停0.5秒
-						time.Sleep(time.Duration(v.Interval) * time.Second)
-					}
-				default:
-					fmt.Println("未定义类型")
-				}
-			}
-		}
-	}
-	return
-}
-
-// GenerateTask 定时任务执行函数
-func GenerateTask(v TimeTask) (err error) {
-	if err = ExecuteTask(v); err != nil {
-		logs.Error("GenerateTask: taskID[%v], err is ", v.ID, err.Error())
 	}
 	return
 }

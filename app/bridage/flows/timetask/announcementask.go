@@ -2,6 +2,8 @@ package timetask
 
 import (
 	"fmt"
+	"strings"
+	"time"
 	"weiXinBot/app/bridage/constant"
 	flow "weiXinBot/app/bridage/flows"
 	bridageModels "weiXinBot/app/bridage/models"
@@ -13,8 +15,8 @@ import (
 // AnnouncementTask 公告任务
 type AnnouncementTask struct{}
 
-// SendImmediately ...
-func (c *AnnouncementTask) SendImmediately(p interface{}) (err error) {
+// TaskImmediately ...
+func (c *AnnouncementTask) TaskImmediately(p interface{}) (err error) {
 	var v bridageModels.TimeTask
 	var ok bool
 	defer func() {
@@ -25,14 +27,27 @@ func (c *AnnouncementTask) SendImmediately(p interface{}) (err error) {
 	if v, ok = p.(bridageModels.TimeTask); !ok {
 		panic("Message SendImmediately: v is not TimeTask struct")
 	}
-	if err = bridageModels.ExecuteTask(v); err != nil {
+	if err = c.TaskGenerate(v); err != nil {
 		logs.Error("AnnouncementTask SendImmediately send failed, err is ", err.Error())
 	}
 	return
 }
 
-// TimingSend 定时发送
-func (c *AnnouncementTask) TimingSend(p interface{}) (err error) {
+// TaskGenerate ...
+func (c *AnnouncementTask) TaskGenerate(p interface{}) (err error) {
+	var v bridageModels.TimeTask
+	var ok bool
+	if v, ok = p.(bridageModels.TimeTask); !ok {
+		panic("Message SendImmediately: v is not TimeTask struct")
+	}
+	if err = c.TaskExcute(v); err != nil {
+		logs.Error("GenerateTask: taskID[%v], err is ", v.ID, err.Error())
+	}
+	return
+}
+
+// TaskSetting 定时发送
+func (c *AnnouncementTask) TaskSetting(p interface{}) (err error) {
 	// 定时任务
 	// 定时任务
 	var v bridageModels.TimeTask
@@ -47,10 +62,65 @@ func (c *AnnouncementTask) TimingSend(p interface{}) (err error) {
 	}
 	taskIns := toolbox.NewTask(fmt.Sprintf("task-%d", v.ID), bridageModels.SetUpTimeFormatString(v.SendType,
 		v.SetUpFormat), func() error {
-		return bridageModels.GenerateTask(v)
+		return c.TaskGenerate(v)
 	})
 	toolbox.AddTask(fmt.Sprintf("task-%d", v.ID), taskIns)
 	return err
+}
+
+// TaskExcute ...
+func (c *AnnouncementTask) TaskExcute(p interface{}) (err error) {
+	var v bridageModels.TimeTask
+	var ok bool
+	if v, ok = p.(bridageModels.TimeTask); !ok {
+		panic("Message SendImmediately: v is not TimeTask struct")
+	}
+	var resources []*bridageModels.Resource
+	var sendTo []string
+	defer func() {
+		tr := new(bridageModels.TimeTaskRecode)
+		tr.Type = v.Type
+		tr.Title = v.Title
+		tr.SendTime = time.Now()
+		tr.ObjectsIDS = v.ObjectsIDS
+		tr.BotWXID = v.BotWXID
+		tr.Manager = v.Manager
+		if err != nil {
+			tr.Status = constant.FAILEDSEND
+			tr.Remark = err.Error()
+		} else {
+			tr.Status = constant.SENDED
+			tr.Remark = "send successful"
+		}
+		bridageModels.AddTimeTaskRecode(tr)
+	}()
+	if sendTo = strings.Split(v.ObjectsIDS, ","); len(sendTo) == 0 {
+		err = fmt.Errorf("sendTo is null")
+		return
+	}
+	if resources, err = bridageModels.GetResourceByIds(v.Resource); err == nil {
+		for _, r := range resources {
+			for _, m := range r.Material {
+				switch m.Type {
+				case 1:
+					// 文本信息
+					for _, st := range sendTo {
+						if err = bridageModels.SendAnnouncement(v.BotWXID, st, m.Data); err != nil {
+							return
+						}
+						// 停 Interval 秒
+						time.Sleep(time.Duration(v.Interval) * time.Second)
+					}
+				case 2:
+					// 图片信息
+					logs.Error("AnnouncementTask: task[%d] have images, It is a error", v.ID)
+				default:
+					fmt.Println("无意义类型")
+				}
+			}
+		}
+	}
+	return
 }
 
 // ModifyTimeTask ...
@@ -66,7 +136,7 @@ func (c *AnnouncementTask) ModifyTimeTask(p interface{}) {
 	// 新建新的任务
 	taskIns := toolbox.NewTask(fmt.Sprintf("task-%d", v.ID), bridageModels.SetUpTimeFormatString(v.SendType,
 		v.SetUpFormat), func() error {
-		return bridageModels.GenerateTask(v)
+		return c.TaskGenerate(v)
 	})
 	toolbox.AddTask(fmt.Sprintf("task-%d", v.ID), taskIns)
 	return

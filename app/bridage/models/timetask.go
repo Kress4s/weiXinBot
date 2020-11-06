@@ -14,10 +14,10 @@ import (
 type TimeTask struct {
 	ID          int64  `orm:"auto;column(id)"`              //
 	Title       string `orm:"size(50);column(title)"`       // 推送内容的标题
-	Type        string `orm:"size(30);column(type)"`        // 任务内容类型(message:发消息;announcement:公告...)
-	Switch      bool   `orm:"column(switch);default(1)"`    // 开关
+	Type        string `orm:"size(30);column(type)"`        // 任务内容类型(messagetask:发消息;announcementask:公告...)
+	Switch      bool   `orm:"column(switch);default(true)"` // 开关
 	Interval    int    `orm:"column(interval)"`             // 发送多群间隔时间
-	SendType    int    `orm:"column(tasktype)"`             // 类型(-1:立刻推送; 0:间隔时间执行; 1:单次执行; 2:按天发送; 3:按周发送; 4:按月发送;)
+	SendType    int    `orm:"column(sendtype)"`             // 类型(-1:立刻推送; 0:间隔时间执行; 1:单次执行; 2:按天发送; 3:按周发送; 4:按月发送;)
 	SetUpFormat string `orm:"size(20);column(setupformat)"` // 设置定时格式的表达式
 	BotWXID     string `orm:"size(30);column(botwxid)"`     // 设置的发送的微信号
 	ObjectsIDS  string `orm:"size(300);column(objectids)"`  // 群组或者联系人
@@ -36,6 +36,7 @@ type TimeTaskRecode struct {
 	SendTime   time.Time `orm:"type(datetime);column(sendtime);null"` // 设置发送时间
 	Status     string    `orm:"size(20);column(status)"`              // 任务状态(UnSend;Sended;)
 	Manager    string    `orm:"size(30);column(manager)"`             // 属于哪个用户的任务(用户Tel)
+	Resource   string    `orm:"size(20);column(resource)"`            // 发送内容(多个)
 	Remark     string    `orm:"size(50);column(remark)"`              // 任务备注
 }
 
@@ -97,7 +98,7 @@ func SetUpTimeFormatString(sendType int, setUpString string) (SetUpFormat string
 			01-01 00:00
 		*/
 		reslice := strings.Split(setUpString, " ")
-		if len(reslice[0]) == 2 && len(reslice[0]) == 2 {
+		if strings.Contains(reslice[1], ":") && strings.Contains(reslice[0], "-") {
 			MD := strings.Split(reslice[0], "-")
 			hm := strings.Split(reslice[1], ":")
 			if len(MD) == 2 && len(hm) == 2 {

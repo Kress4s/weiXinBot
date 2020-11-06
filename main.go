@@ -5,7 +5,8 @@ import (
 	"os"
 	_ "weiXinBot/app/bridage/common/dbmysql"
 
-	_ "weiXinBot/app/bridage/grpc"
+	// _ "weiXinBot/app/bridage/grpc"
+	_ "weiXinBot/app/bridage/flows/timetask"
 	_ "weiXinBot/app/bridage/models"
 	_ "weiXinBot/app/routers"
 

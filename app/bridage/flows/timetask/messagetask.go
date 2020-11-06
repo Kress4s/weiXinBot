@@ -53,7 +53,7 @@ func (c *MessageTask) TaskSetting(p interface{}) (err error) {
 	var ok bool
 	defer func() {
 		if verr := recover(); verr != nil {
-			logs.Error("AnnouncementTask SendImmediately: err is ", verr)
+			logs.Error("Message SendImmediately: err is ", verr)
 		}
 	}()
 	if v, ok = p.(bridageModels.TimeTask); !ok {
@@ -63,6 +63,7 @@ func (c *MessageTask) TaskSetting(p interface{}) (err error) {
 		v.SetUpFormat), func() error {
 		return c.TaskGenerate(v)
 	})
+	logs.Info("设置定时任务 ", bridageModels.SetUpTimeFormatString(v.SendType, v.SetUpFormat))
 	toolbox.AddTask(fmt.Sprintf("task-%d", v.ID), taskIns)
 	return
 }
@@ -83,6 +84,7 @@ func (c *MessageTask) TaskExcute(p interface{}) (err error) {
 		tr.SendTime = time.Now()
 		tr.ObjectsIDS = v.ObjectsIDS
 		tr.BotWXID = v.BotWXID
+		tr.Resource = v.Resource
 		tr.Manager = v.Manager
 		if err != nil {
 			tr.Status = constant.FAILEDSEND
@@ -104,6 +106,7 @@ func (c *MessageTask) TaskExcute(p interface{}) (err error) {
 				case 1:
 					// 文本信息
 					for _, st := range sendTo {
+						fmt.Println("开始发送消息")
 						if err = bridageModels.SendText(v.BotWXID, st, m.Data); err != nil {
 							return
 						}
@@ -113,10 +116,11 @@ func (c *MessageTask) TaskExcute(p interface{}) (err error) {
 				case 2:
 					// 图片信息
 					for _, st := range sendTo {
+						fmt.Println("开始发送图片")
 						if err = bridageModels.SendImage(v.BotWXID, st, m.Data); err != nil {
 							return
 						}
-						// 停0.5秒
+						// 停 Interval 秒
 						time.Sleep(time.Duration(v.Interval) * time.Second)
 					}
 				default:

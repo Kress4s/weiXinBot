@@ -25,7 +25,7 @@ func (c *AnnouncementTask) TaskImmediately(p interface{}) (err error) {
 		}
 	}()
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Message SendImmediately: v is not TimeTask struct")
+		panic("Announcement SendImmediately: v is not TimeTask struct")
 	}
 	if err = c.TaskGenerate(v); err != nil {
 		logs.Error("AnnouncementTask SendImmediately send failed, err is ", err.Error())
@@ -38,7 +38,7 @@ func (c *AnnouncementTask) TaskGenerate(p interface{}) (err error) {
 	var v bridageModels.TimeTask
 	var ok bool
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Message SendImmediately: v is not TimeTask struct")
+		panic("Announcement SendImmediately: v is not TimeTask struct")
 	}
 	if err = c.TaskExcute(v); err != nil {
 		logs.Error("GenerateTask: taskID[%v], err is ", v.ID, err.Error())
@@ -84,6 +84,7 @@ func (c *AnnouncementTask) TaskExcute(p interface{}) (err error) {
 		tr.SendTime = time.Now()
 		tr.ObjectsIDS = v.ObjectsIDS
 		tr.BotWXID = v.BotWXID
+		tr.Resource = v.Resource
 		tr.Manager = v.Manager
 		if err != nil {
 			tr.Status = constant.FAILEDSEND
@@ -105,6 +106,7 @@ func (c *AnnouncementTask) TaskExcute(p interface{}) (err error) {
 				case 1:
 					// 文本信息
 					for _, st := range sendTo {
+						logs.Info("发送群公告")
 						if err = bridageModels.SendAnnouncement(v.BotWXID, st, m.Data); err != nil {
 							return
 						}

@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"time"
 	"weiXinBot/app/bridage/common"
@@ -93,6 +94,7 @@ func SendText(At, To, Content string) (err error) {
 	}
 	// 目前地底层协议发送成功和失败code都是0，没明确提示
 	if response.Code != 0 {
+		err = fmt.Errorf("%s", response.Message)
 		logs.Error("sender[%s] send message[%s] to receiver[%s] failed, err is ", At, Content, To, err.Error())
 		return err
 	}
@@ -123,6 +125,7 @@ func SendImage(At, To, Content string) (err error) {
 	}
 	// 目前地底层发送成功和失败code都是0，没明确提示
 	if response.Code != 0 {
+		err = fmt.Errorf("%s", response.Message)
 		logs.Error("send message[%s] to receiver[%s] failed, err is ", Content, To, err.Error())
 		return err
 	}
@@ -137,10 +140,10 @@ func SendAnnouncement(At, To, Content string) (err error) {
 	if bot, err = GetBotByWXID(At); err != nil {
 		return
 	}
-	announce := new(AnnounceMessage)
+	var announce = new(AnnounceMessage)
 	announce.Announcement = Content
 	announce.GroupID = To
-	res, verr := httplib.Post(constant.SEND_TEXT).Header(constant.H_AUTHORIZATION, bot.Token).JSONBody(&announce)
+	res, verr := httplib.Post(constant.GROUP_SET_ANNOUNCE_URL).Header(constant.H_AUTHORIZATION, bot.Token).JSONBody(&announce)
 	if verr != nil {
 		logs.Error("[%+v] send message to [%s] faield, err is %s", bot.WXID, announce.GroupID, err.Error())
 		return verr
@@ -151,6 +154,7 @@ func SendAnnouncement(At, To, Content string) (err error) {
 	}
 	// 目前地底层发送成功和失败code都是0，没明确提示
 	if response.Code != 0 {
+		err = fmt.Errorf("%s", response.Message)
 		logs.Error("send message[%s] to receiver[%s] failed, err is ", Content, To, err.Error())
 		return err
 	}

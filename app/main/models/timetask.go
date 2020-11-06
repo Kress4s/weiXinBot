@@ -25,8 +25,10 @@ func AddTimeTask(m *bridageModels.TimeTask) (id int64, err error) {
 	}
 	switch m.SendType {
 	case -1:
+		logs.Info("即时任务")
 		go timetasker.TaskImmediately(*m)
 	default:
+		logs.Info("定时任务")
 		go timetasker.TaskSetting(*m)
 	}
 	return

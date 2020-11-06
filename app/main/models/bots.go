@@ -70,9 +70,9 @@ func IsNeedRestart(WXID string) (bool, error) {
 	if err = o.Read(&bot, "WXID"); err == nil {
 		if bot.LoginStatus == 0 {
 			return true, nil
-		} else if err == orm.ErrNoRows {
-			return true, nil
 		}
+	} else if err == orm.ErrNoRows {
+		return true, nil
 	}
 	return false, err
 }

@@ -7,6 +7,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+	"weiXinBot/app/bridage/constant"
+
+	"github.com/astaxie/beego/httplib"
 )
 
 const (
@@ -52,4 +55,9 @@ func PraseXMLString(content string) (wxsysmsg *WxSysMsg, err error) {
 		return nil, err
 	}
 	return &sysmsg, nil
+}
+
+// ListenGrpcStatus ...监听grpc状态通报
+func ListenGrpcStatus() {
+	httplib.Get(strings.ReplaceAll(constant.BASE_URL[:7]+constant.GRPC_BASE_URL, "8081", "10052")).DoRequest()
 }

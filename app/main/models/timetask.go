@@ -217,3 +217,38 @@ func GetAllRecode(manager, status string) (ret interface{}, count int64, err err
 	}
 	return l, count, nil
 }
+
+// 定时任务拉起
+// func init() {
+// 	var messageTimeTasker, announceTimeTasker taskflow.TaskFactory
+// 	var limit = 50
+// 	var err error
+// 	o := orm.NewOrm()
+// 	var count = 0
+// 	if messageTimeTasker, err = taskflow.GetTaskIns(constant.MESSAGE_TASK); err != nil {
+// 		logs.Error(err.Error())
+// 		return
+// 	}
+// 	if announceTimeTasker, err = taskflow.GetTaskIns(constant.ANNOUNCEMENT_TASK); err != nil {
+// 		logs.Error(err.Error())
+// 		return
+// 	}
+// 	for {
+// 		var tasks []*bridageModels.TimeTask
+// 		if _, err = o.QueryTable(new(bridageModels.TimeTask)).Filter("Switch", true).Exclude("SendType", -1).Limit(limit, limit*count).All(&tasks); err != nil {
+// 			panic("messagetask hooking failed")
+// 		}
+// 		if len(tasks) == 0 {
+// 			break
+// 		}
+// 		for _, task := range tasks {
+// 			switch task.Type {
+// 			case constant.MESSAGE_TASK:
+// 				go messageTimeTasker.TaskSetting(task)
+// 			case constant.ANNOUNCEMENT_TASK:
+// 				go announceTimeTasker.TaskSetting(task)
+// 			}
+// 		}
+// 		count++
+// 	}
+// }

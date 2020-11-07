@@ -163,6 +163,18 @@ func (c *MessageTask) DeleteTimeTask(p interface{}) {
 	return
 }
 
+// TasksHooked ...
+func (c *MessageTask) TasksHooked(p []interface{}) {
+	var err error
+	for _, v := range p {
+		if err = c.TaskSetting(v); err != nil {
+			logs.Error("TaskSetting, accoured err is ", err.Error())
+			continue
+		}
+	}
+	return
+}
+
 func init() {
 	flow.Register(constant.MESSAGE_TASK, &MessageTask{})
 }

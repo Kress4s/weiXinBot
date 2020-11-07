@@ -49,7 +49,6 @@ func (c *AnnouncementTask) TaskGenerate(p interface{}) (err error) {
 // TaskSetting 定时发送
 func (c *AnnouncementTask) TaskSetting(p interface{}) (err error) {
 	// 定时任务
-	// 定时任务
 	var v bridageModels.TimeTask
 	var ok bool
 	defer func() {
@@ -153,6 +152,18 @@ func (c *AnnouncementTask) DeleteTimeTask(p interface{}) {
 		panic("Message SendImmediately: v is not TimeTask struct")
 	}
 	toolbox.DeleteTask(fmt.Sprintf("task-%d", v.ID))
+	return
+}
+
+// TasksHooked ...
+func (c *AnnouncementTask) TasksHooked(p []interface{}) {
+	var err error
+	for _, v := range p {
+		if err = c.TaskSetting(v); err != nil {
+			logs.Error("TaskSetting, accoured err is ", err.Error())
+			continue
+		}
+	}
 	return
 }
 

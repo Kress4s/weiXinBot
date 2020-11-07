@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"weiXinBot/app/bridage/common"
 	_ "weiXinBot/app/bridage/common/dbmysql"
 
 	_ "weiXinBot/app/bridage/flows/timetask"
@@ -51,6 +52,7 @@ func main() {
 		switch args[1] {
 		case "start":
 			//runtime.GOMAXPROCS(runtime.NumCPU()) // 预置运行规格协程信息
+			common.ListenGrpcStatus()
 			toolbox.StartTask()      // 开始全局定时任务
 			defer toolbox.StopTask() //
 			beego.Run()

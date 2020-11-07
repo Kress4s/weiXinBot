@@ -9,9 +9,10 @@ type TaskFactory interface {
 	TaskImmediately(interface{}) error
 	TaskGenerate(interface{}) error
 	TaskSetting(interface{}) error
-	TaskExcute(p interface{}) error
-	ModifyTimeTask(p interface{})
-	DeleteTimeTask(p interface{})
+	TaskExcute(interface{}) error
+	ModifyTimeTask(interface{})
+	DeleteTimeTask(interface{})
+	TasksHooked([]interface{})
 }
 
 // TaskTypeMap ...

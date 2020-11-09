@@ -47,9 +47,33 @@ func init() {
 func UpdateBotByWXID(m *Bots) (err error) {
 	o := orm.NewOrm()
 	v := Bots{WXID: m.WXID}
+	// 添加回滚
+	defer func() {
+		if err == nil {
+			o.Commit()
+		} else {
+			o.Rollback()
+		}
+	}()
+	o.Begin()
 	if err = o.Read(&v, "WXID"); err == nil {
 		// update needs ID
 		m.ID = v.ID
+		if v.Manager.ID != m.Manager.ID {
+			/* 表示微信号的所属账号迁移了
+			1. 删除所有此微信号所有的功能配置
+			2. 把此微信号的群之前所属的grouplanid置null,之前配置的此微信号下面的群管方案都无效，且群信息保留
+			*/
+			if err = DeleteConifgForWxMigration(v.WXID); err != nil {
+				return
+			}
+			if _, err = o.QueryTable(new(Group)).Filter("Bots", m).Update(orm.Params{
+				"GroupPlan": nil,
+			}); err != nil {
+				logs.Error("UpdateBotByWXID: migrate wx[%s] delete group's grouplan failed, err is %s", m.WXID, err.Error())
+				return
+			}
+		}
 		var num int64
 		if num, err = o.Update(m); err == nil {
 			logs.Debug("Number of User update in database:", num)
@@ -58,7 +82,7 @@ func UpdateBotByWXID(m *Bots) (err error) {
 	return
 }
 
-// IsManagerNewBot 判断该用户下是否存在过这个机器人
+// IsManagerNewBot 判断是新机器人机器人
 func IsManagerNewBot(m *Bots) (isExist bool) {
 	o := orm.NewOrm()
 	if !o.QueryTable(new(Bots)).Filter("WXID", m.WXID).Exist() {

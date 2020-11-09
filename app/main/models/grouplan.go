@@ -4,6 +4,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
+	"strings"
 	"weiXinBot/app/bridage/common"
 	bridageModels "weiXinBot/app/bridage/models"
 
@@ -175,6 +176,31 @@ func UpdateGrouplanByID(m *bridageModels.GroupPlan) (err error) {
 // the record to be deleted doesn't exist
 func DeleteGrouplanByID(id int64) (err error) {
 	o := orm.NewOrm()
+	/*
+	 1. 找出该方案下所有的群（当groupPlan被删除时自动置空）
+	 2. 找到这些群被哪些机器人托管
+	 3. 删除这些
+	*/
+	o.Begin()
+	defer func() {
+		if err == nil {
+			o.Commit()
+		} else {
+			o.Rollback()
+		}
+	}()
+	var groups []*bridageModels.Group
+	if _, err = o.QueryTable(new(bridageModels.Group)).Filter("GroupPlan__ID", id).RelatedSel().All(&groups); err != nil {
+		logs.Error("DeleteGrouplanByID: get all groups by planid failed, err is ", err.Error())
+		return
+	}
+	var wxids []string
+	for _, group := range groups {
+		wxids = append(wxids, group.Bots.WXID)
+	}
+	if err = bridageModels.DeleteConifgForWxMigration(strings.Join(wxids, ",")); err != nil {
+		return
+	}
 	v := bridageModels.GroupPlan{ID: id}
 	if err = o.Read(&v); err == nil {
 		var num int64

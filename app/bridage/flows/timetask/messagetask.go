@@ -41,7 +41,7 @@ func (c *MessageTask) TaskGenerate(p interface{}) (err error) {
 		panic("Message SendImmediately: v is not TimeTask struct")
 	}
 	if err = c.TaskExcute(v); err != nil {
-		logs.Error("GenerateTask: taskID[%v], err is ", v.ID, err.Error())
+		logs.Error("GenerateTask: taskID[%v], err is %s", v.ID, err.Error())
 	}
 	return
 }

@@ -25,7 +25,7 @@ type Group struct {
 	Listers        string     `orm:"size(500);column(listers)" json:"listers"`                           //成员微信号的IDs，”，“连接 接口返回值[]不好处理 记录1
 	IsNeedServe    bool       `orm:"column(isneedserve);default(0)" json:"isneedserver"`                 // 是否有服务功能
 	Bots           *Bots      `orm:"rel(fk)"`                                                            //
-	GroupPlan      *GroupPlan `orm:"null;rel(fk)"`                                                       //群方案
+	GroupPlan      *GroupPlan `orm:"null;rel(fk);on_delete(set_null)"`                                   //群方案
 	Messages       []*Message `orm:"reverse(many)"`                                                      //
 }
 

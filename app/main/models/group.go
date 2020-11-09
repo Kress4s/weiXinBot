@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -162,6 +163,11 @@ func GetGroupByGID(GID string) (v *bridageModels.Group, err error) {
 
 // UpdateGrouByID ...
 func UpdateGrouByID(m *bridageModels.Group) (err error) {
+	/*
+		思路:
+		1. 修改群对应的方案(根据群号和微信号判断)
+		2. 修改配置信息：找到机器人的配置信息和修改前后的方案id，且objectids中存在该群的配置，修改即可
+	*/
 	var v = bridageModels.Group{GID: m.GID}
 	o := orm.NewOrm()
 	if err = o.Read(&v); err == nil {
@@ -196,6 +202,9 @@ func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err err
 	for _, _m := range m {
 		if !o.QueryTable(new(bridageModels.Group)).Filter("GID", _m.GID).Filter("Bots", _m.Bots).Exist() {
 			// 未存在
+			if _m.NickName == "" {
+				_m.NickName = fmt.Sprintf("群聊(%d)", _m.MemberNum)
+			}
 			if _, err = o.Insert(_m); err != nil {
 				logs.Error("MultiUpdateGrouByID: insert Group failed, err is ", err.Error())
 				return

@@ -11,12 +11,12 @@ import (
 
 // Configuration 功能设置(消息监听使用)
 type Configuration struct {
-	ID        int64  `orm:"auto;column(id)"`              //
-	Type      int    `orm:"column(type)"`                 // 配置对象 0: 群组; 1: 联系人 ...可拓展
-	FuncType  int    `orm:"column(function_type)"`        // 功能配置类型 1:入群欢迎语 2:关键词回复 3:自动踢人...可拓展
-	FuncID    int64  `orm:"column(function_id)"`          // 配置ID
-	BotWXID   string `orm:"size(30);column(bot_wxid)"`    // 机器人微信ID，执行消息回复、踢人等操作的微信号(保证机器人是正确的)
-	ObjectIDS string `orm:"size(200);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
+	ID        int64  `orm:"auto;column(id)"`               //
+	Type      int    `orm:"column(type)"`                  // 配置对象 0: 群组; 1: 联系人 ...可拓展
+	FuncType  int    `orm:"column(function_type)"`         // 功能配置类型 1:入群欢迎语 2:关键词回复 3:自动踢人...可拓展
+	FuncID    int64  `orm:"column(function_id)"`           // 配置ID
+	BotWXID   string `orm:"size(30);column(bot_wxid)"`     // 机器人微信ID，执行消息回复、踢人等操作的微信号(保证机器人是正确的)
+	ObjectIDS string `orm:"size(1000);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
 }
 
 // GBGRelation ...
@@ -166,4 +166,28 @@ func GroupService(message common.ProtoMessage) {
 			logs.Error("function config Type[%d] is not right, please cheak it and modify it", v.FuncType)
 		}
 	}
+}
+
+// DeleteConifgForWxMigration 供微信号账号迁移使用
+func DeleteConifgForWxMigration(WXIDs interface{}) (err error) {
+	type wxIDS []string
+	o := orm.NewOrm()
+	var num int64
+	// 账号迁移删除的配置
+	if wxid, ok := WXIDs.(string); ok {
+		if !strings.Contains(wxid, ",") {
+			if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID", wxid).Delete(); err == nil {
+				logs.Debug("Number of Configuration deleted in database:", num)
+				return
+			}
+		} else {
+			// 删除方案批量清空配置
+			if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID__in", strings.Split(wxid, ",")).Delete(); err == nil {
+				logs.Debug("Number of Configuration deleted in database:", num)
+			}
+		}
+	} else {
+		err = fmt.Errorf("DeleteConifgForWxMigration WXIDs is not string")
+	}
+	return
 }

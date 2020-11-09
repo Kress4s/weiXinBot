@@ -4,7 +4,6 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
-	"strings"
 	"weiXinBot/app/bridage/common"
 	bridageModels "weiXinBot/app/bridage/models"
 
@@ -189,16 +188,7 @@ func DeleteGrouplanByID(id int64) (err error) {
 			o.Rollback()
 		}
 	}()
-	var groups []*bridageModels.Group
-	if _, err = o.QueryTable(new(bridageModels.Group)).Filter("GroupPlan__ID", id).RelatedSel().All(&groups); err != nil {
-		logs.Error("DeleteGrouplanByID: get all groups by planid failed, err is ", err.Error())
-		return
-	}
-	var wxids []string
-	for _, group := range groups {
-		wxids = append(wxids, group.Bots.WXID)
-	}
-	if err = bridageModels.DeleteConifgForWxMigration(strings.Join(wxids, ",")); err != nil {
+	if err = bridageModels.DeleteConifgForWxMigration(id); err != nil {
 		return
 	}
 	v := bridageModels.GroupPlan{ID: id}

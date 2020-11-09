@@ -162,6 +162,15 @@ func init() {
 
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"],
         beego.ControllerComments{
+            Method: "DeleteMyGroupsMgr",
+            Router: "/delgroupmgr/:gid",
+            AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GrouPlanController"],
+        beego.ControllerComments{
             Method: "GetPlanFuncID",
             Router: "/getfuncinfo/:grouplanid",
             AllowHTTPMethods: []string{"get"},
@@ -207,15 +216,6 @@ func init() {
 
     beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"],
         beego.ControllerComments{
-            Method: "Put",
-            Router: "/:gid",
-            AllowHTTPMethods: []string{"put"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"],
-        beego.ControllerComments{
             Method: "GetGroupFromProto",
             Router: "/groupfromproto",
             AllowHTTPMethods: []string{"get"},
@@ -228,6 +228,15 @@ func init() {
             Method: "MultiPost",
             Router: "/multi",
             AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"] = append(beego.GlobalControllerRouter["weiXinBot/app/main/controllers:GroupController"],
+        beego.ControllerComments{
+            Method: "PutMyGroupsMgr",
+            Router: "/putgroupmgr/:gid",
+            AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

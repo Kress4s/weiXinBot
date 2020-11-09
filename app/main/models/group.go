@@ -161,8 +161,8 @@ func GetGroupByGID(GID string) (v *bridageModels.Group, err error) {
 	return v, nil
 }
 
-// UpdateGrouByID ...
-func UpdateGrouByID(m *bridageModels.Group) (err error) {
+// UpdateGroupByID ...
+func UpdateGroupByID(m *bridageModels.Group) (err error) {
 	/*
 		思路:
 		1. 修改群对应的方案(根据群号和微信号判断)
@@ -170,17 +170,53 @@ func UpdateGrouByID(m *bridageModels.Group) (err error) {
 	*/
 	var v = bridageModels.Group{GID: m.GID}
 	o := orm.NewOrm()
-	if err = o.Read(&v); err == nil {
+	defer func() {
+		if err == nil {
+			o.Commit()
+		} else {
+			o.Rollback()
+		}
+	}()
+	o.Begin()
+	if err = o.QueryTable(new(bridageModels.Group)).Filter("GID", m.ID).RelatedSel("Bots").One(&v); err == nil {
 		var num int64
-		if num, err = o.Update(m, "IsNeedServe", "GroupPlan"); err == nil {
-			logs.Debug("Number of Bot update in database:", num)
+		if v.GroupPlan != m.GroupPlan {
+			if err = bridageModels.UpdateConfigByCutPlan(v.Bots.WXID, v.GID, v.GroupPlan.ID); err != nil {
+				return
+			}
+			// 新方案后面所有的配置objects要补上
+			if o.QueryTable(new(bridageModels.Configuration)).Filter("BotWXID", m.Bots.WXID).Filter("GrouplanID", m.GroupPlan.ID).Exist() {
+				// 该微信号之前有配置信息，直接加上群号
+				if num, err = o.QueryTable(new(bridageModels.Configuration)).Filter("BotWXID", m.Bots.WXID).Filter("GrouplanID", m.GroupPlan.ID).
+					Update(orm.Params{
+						"ObjectIDS": orm.ColValue(orm.ColAdd, m.GID),
+					}); err == nil {
+					logs.Debug("Number of Config update in database:", num)
+				}
+			} else {
+				// 该微信号的当前的群之前配置表中没有配置过，新增方案下面的配置信息，批量插入
+				var newConfigs []*bridageModels.Configuration
+				if _, err = o.QueryTable(new(bridageModels.Configuration)).Filter("GrouplanID", m.GroupPlan.ID).All(&newConfigs); err == nil {
+					for _, _v := range newConfigs {
+						_v.ID = 0
+						_v.BotWXID = m.Bots.WXID
+						_v.ObjectIDS = m.GID
+					}
+					if num, err = o.InsertMulti(1, newConfigs); err == nil {
+						logs.Error("UpdateGroupByID: InsertMulti")
+					}
+				}
+			}
+		}
+		if num, err = o.Update(&m, "IsNeedServe", "GroupPlan"); err == nil {
+			logs.Debug("Number of Group update in database:", num)
 		}
 	}
 	return
 }
 
-// MultiUpdateGrouByID ...
-func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err error) {
+// MultiUpdateGroupByID ...
+func MultiUpdateGroupByID(m []*bridageModels.Group, delgroupsIDs string) (err error) {
 	/*
 		思路:
 		1. 根据机器人和所属GID去查询(存在表明这个机器人管理的群有配置)
@@ -200,11 +236,11 @@ func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err err
 		return
 	}
 	for _, _m := range m {
+		if _m.NickName == "" {
+			_m.NickName = fmt.Sprintf("群聊(%d)", _m.MemberNum)
+		}
 		if !o.QueryTable(new(bridageModels.Group)).Filter("GID", _m.GID).Filter("Bots", _m.Bots).Exist() {
 			// 未存在
-			if _m.NickName == "" {
-				_m.NickName = fmt.Sprintf("群聊(%d)", _m.MemberNum)
-			}
 			if _, err = o.Insert(_m); err != nil {
 				logs.Error("MultiUpdateGrouByID: insert Group failed, err is ", err.Error())
 				return
@@ -213,6 +249,13 @@ func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err err
 			// 已存在
 			var _M = bridageModels.Group{GID: _m.GID, Bots: _m.Bots}
 			if err = o.Read(&_M, "GID", "Bots"); err == nil {
+				if _M.GroupPlan != nil && _M.GroupPlan.ID != _m.GroupPlan.ID {
+					// 该群之前有配置且当前配置切换了方案
+					// 修改配置表的objectids
+					if err = bridageModels.UpdateConfigByCutPlan(_M.Bots.WXID, _M.GID, _M.GroupPlan.ID); err != nil {
+						return
+					}
+				}
 				var num int64
 				_m.ID = _M.ID
 				if num, err = o.Update(_m); err == nil {
@@ -239,6 +282,33 @@ func MultiUpdateGrouByID(m []*bridageModels.Group, delgroupsIDs string) (err err
 		}); err != nil {
 			return
 		}
+	}
+	return
+}
+
+// DeleteGroupMgrByID 我的群管删除
+func DeleteGroupMgrByID(gid string) (err error) {
+	o := orm.NewOrm()
+	o.Begin()
+	defer func() {
+		if err == nil {
+			o.Commit()
+		} else {
+			o.Rollback()
+		}
+	}()
+	group := bridageModels.Group{GID: gid}
+	if err = o.QueryTable(new(bridageModels.Group)).Filter("GID", gid).RelatedSel("Bots").One(&group); err != nil {
+		logs.Error("DeleteGroupMgrByID: get group failed, err is", err.Error())
+		return
+	}
+	if err = bridageModels.UpdateConfigByCutPlan(group.Bots.WXID, group.GID, group.GroupPlan.ID); err != nil {
+		return
+	}
+	var num int64
+	group.GroupPlan = nil
+	if num, err = o.Update(&group, "GroupPlan"); err == nil {
+		logs.Debug("Number of Group update in database:", num)
 	}
 	return
 }

@@ -45,6 +45,7 @@ func UpdateOrAddConfig(m bridageModels.MultiDealConfig) (err error) {
 		config.Type = m.Type
 		config.BotWXID = v.BotWXID
 		config.ObjectIDS = v.ObjectsIDS
+		config.GrouplanID = v.GrouplanID
 		for _k, _v := range m.FuncInfoList[k].Info {
 			config.FuncType, _ = strconv.Atoi(_k)
 			config.FuncID = _v

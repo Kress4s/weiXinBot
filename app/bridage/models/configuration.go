@@ -11,12 +11,13 @@ import (
 
 // Configuration 功能设置(消息监听使用)
 type Configuration struct {
-	ID        int64  `orm:"auto;column(id)"`               //
-	Type      int    `orm:"column(type)"`                  // 配置对象 0: 群组; 1: 联系人 ...可拓展
-	FuncType  int    `orm:"column(function_type)"`         // 功能配置类型 1:入群欢迎语 2:关键词回复 3:自动踢人...可拓展
-	FuncID    int64  `orm:"column(function_id)"`           // 配置ID
-	BotWXID   string `orm:"size(30);column(bot_wxid)"`     // 机器人微信ID，执行消息回复、踢人等操作的微信号(保证机器人是正确的)
-	ObjectIDS string `orm:"size(1000);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
+	ID         int64  `orm:"auto;column(id)"`               //
+	Type       int    `orm:"column(type)"`                  // 配置对象 0: 群组; 1: 联系人 ...可拓展
+	FuncType   int    `orm:"column(function_type)"`         // 功能配置类型 1:入群欢迎语 2:关键词回复 3:自动踢人...可拓展
+	FuncID     int64  `orm:"column(function_id)"`           // 配置ID
+	BotWXID    string `orm:"size(30);column(bot_wxid)"`     // 机器人微信ID，执行消息回复、踢人等操作的微信号(保证机器人是正确的)
+	ObjectIDS  string `orm:"size(1000);column(object_ids)"` // 要执行对象的IDs,多个用”,“连接(群、联系人...可拓展)
+	GrouplanID int64  `orm:"column(grouplan_id)"`           // 所属的方案
 }
 
 // GBGRelation ...
@@ -34,6 +35,7 @@ type MultiDealConfig struct {
 		BotWXID    string
 		Info       map[string]int64
 		ObjectsIDS string
+		GrouplanID int64
 	}
 }
 
@@ -47,6 +49,9 @@ func init() {
 // func GroupIsNeedServer(fromUserName, toUserName string) (isServer bool, err error) {
 func GroupIsNeedServer(message common.ProtoMessage) (isServer bool, err error) {
 	o := orm.NewOrm()
+	/*
+		这里可以做我的群管状态修改(gid和botid判断)
+	*/
 	// is group message
 	if !strings.Contains(message.FromUserName.Str, "@chatroom") {
 		return false, nil
@@ -168,26 +173,45 @@ func GroupService(message common.ProtoMessage) {
 	}
 }
 
-// DeleteConifgForWxMigration 供微信号账号迁移使用
-func DeleteConifgForWxMigration(WXIDs interface{}) (err error) {
-	type wxIDS []string
+// DeleteConifgForWxMigration ...
+func DeleteConifgForWxMigration(wxidOrPlanid interface{}) (err error) {
 	o := orm.NewOrm()
 	var num int64
 	// 账号迁移删除的配置
-	if wxid, ok := WXIDs.(string); ok {
-		if !strings.Contains(wxid, ",") {
-			if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID", wxid).Delete(); err == nil {
-				logs.Debug("Number of Configuration deleted in database:", num)
-				return
-			}
-		} else {
+	if wxid, ok := wxidOrPlanid.(string); ok {
+		if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID", wxid).Delete(); err == nil {
+			logs.Debug("Number of Configuration deleted in database:", num)
+			return
+		} else if grouplanid, ok := wxidOrPlanid.(int64); ok {
 			// 删除方案批量清空配置
-			if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID__in", strings.Split(wxid, ",")).Delete(); err == nil {
+			if num, err = o.QueryTable(new(Configuration)).Filter("GrouplainID", grouplanid).Delete(); err == nil {
 				logs.Debug("Number of Configuration deleted in database:", num)
 			}
 		}
 	} else {
 		err = fmt.Errorf("DeleteConifgForWxMigration WXIDs is not string")
+	}
+	return
+}
+
+// UpdateConfigByCutPlan 我的群管修改方案 或者 设置微信群到另外一个方案下的情况， 需要针对性的修改config配置
+func UpdateConfigByCutPlan(BotWXID, gid string, grouplanID int64) (err error) {
+	var configs []*Configuration
+	o := orm.NewOrm()
+	// strings.ReplaceAll()
+	if _, err = o.QueryTable(new(Configuration)).Filter("BotWXID", BotWXID).Filter("GrouplanID", grouplanID).
+		Filter("ObjectIDS__contains", gid).All(&configs); err == nil {
+		for _, config := range configs {
+			if strings.Contains(config.ObjectIDS, gid+",") {
+				config.ObjectIDS = strings.ReplaceAll(config.ObjectIDS, gid+",", "")
+			} else {
+				config.ObjectIDS = strings.ReplaceAll(config.ObjectIDS, ","+gid, "")
+			}
+			if _, err = o.Update(&config, "ObjectIDS"); err != nil {
+				logs.Error("UpdateConfigByCutPlan: update config failed, err is ", err.Error())
+				return
+			}
+		}
 	}
 	return
 }

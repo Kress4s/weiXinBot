@@ -188,9 +188,9 @@ func (c *GroupController) GetGroupFromProto() {
 	v, err = bridageModels.ProtoGiveGroup(Authorization)
 }
 
-// Put ...
-// @router /:gid [put]
-func (c *GroupController) Put() {
+// PutMyGroupsMgr ...
+// @router /putgroupmgr/:gid [put]
+func (c *GroupController) PutMyGroupsMgr() {
 	var err error
 	defer func() {
 		if err != nil {
@@ -205,7 +205,23 @@ func (c *GroupController) Put() {
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return
 	}
-	err = models.UpdateGrouByID(&v)
+	err = models.UpdateGroupByID(&v)
+}
+
+// DeleteMyGroupsMgr ...
+// @router /delgroupmgr/:gid [delete]
+func (c *GrouPlanController) DeleteMyGroupsMgr() {
+	var err error
+	defer func() {
+		if err != nil {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		} else {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok"}
+		}
+		c.ServeJSON()
+	}()
+	gid := c.Ctx.Input.Param(":gid")
+	err = models.DeleteGroupMgrByID(gid)
 }
 
 // MultiPut ...
@@ -230,5 +246,5 @@ func (c *GroupController) MultiPut() {
 	if err = json.Unmarshal(c.Ctx.Input.RequestBody, &v); err != nil {
 		return
 	}
-	err = models.MultiUpdateGrouByID(v.Data, moveOutGroups)
+	err = models.MultiUpdateGroupByID(v.Data, moveOutGroups)
 }

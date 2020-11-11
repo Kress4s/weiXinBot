@@ -38,7 +38,7 @@ func (c *AnnouncementTask) TaskGenerate(p interface{}) (err error) {
 	var v bridageModels.TimeTask
 	var ok bool
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Announcement SendImmediately: v is not TimeTask struct")
+		panic("Announcement TaskGenerate: v is not TimeTask struct")
 	}
 	if err = c.TaskExcute(v); err != nil {
 		logs.Error("GenerateTask: taskID[%v], err is ", v.ID, err.Error())
@@ -53,11 +53,11 @@ func (c *AnnouncementTask) TaskSetting(p interface{}) (err error) {
 	var ok bool
 	defer func() {
 		if verr := recover(); verr != nil {
-			logs.Error("AnnouncementTask SendImmediately: err is ", verr)
+			logs.Error("AnnouncementTask TaskSetting: err is ", verr)
 		}
 	}()
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Message SendImmediately: v is not TimeTask struct")
+		panic("AnnouncementTask TaskSetting: v is not TimeTask struct")
 	}
 	taskIns := toolbox.NewTask(fmt.Sprintf("task-%d", v.ID), bridageModels.SetUpTimeFormatString(v.SendType,
 		v.SetUpFormat), func() error {
@@ -72,7 +72,7 @@ func (c *AnnouncementTask) TaskExcute(p interface{}) (err error) {
 	var v bridageModels.TimeTask
 	var ok bool
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Message SendImmediately: v is not TimeTask struct")
+		panic("AnnouncementTask TaskExcute: v is not TimeTask struct")
 	}
 	var resources []*bridageModels.Resource
 	var sendTo []string
@@ -130,7 +130,7 @@ func (c *AnnouncementTask) ModifyTimeTask(p interface{}) {
 	var v bridageModels.TimeTask
 	var ok bool
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Message SendImmediately: v is not TimeTask struct")
+		panic("AnnouncementTask ModifyTimeTask: v is not TimeTask struct")
 	}
 	// 删除原来的任务
 	toolbox.DeleteTask(fmt.Sprintf("task-%d", v.ID))
@@ -149,7 +149,7 @@ func (c *AnnouncementTask) DeleteTimeTask(p interface{}) {
 	var v bridageModels.TimeTask
 	var ok bool
 	if v, ok = p.(bridageModels.TimeTask); !ok {
-		panic("Message SendImmediately: v is not TimeTask struct")
+		panic("AnnouncementTask DeleteTimeTask: v is not TimeTask struct")
 	}
 	toolbox.DeleteTask(fmt.Sprintf("task-%d", v.ID))
 	return

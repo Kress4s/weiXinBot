@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -105,4 +106,25 @@ func ProtoGiveGroup(Authorization string) (ret interface{}, err error) {
 		wxContactSeq = strconv.Itoa(restBody.Data.CurrentWxContactSeq)         //
 	}
 	return retGroup, nil
+}
+
+// GetGroupInfoByGIDs ... eg: gids 20102797431@chatroom,22475302355@chatroom
+func GetGroupInfoByGIDs(gids string) (v interface{}, err error) {
+	type GroupInfo struct {
+		GId               string `json:"wx_id"`
+		NickName          string `json:"nick_name"`
+		HeadSmallImageUrl string `json:"head_small_image_url"`
+	}
+	if len(gids) == 0 {
+		err := fmt.Errorf("GetGroupInfoByGIDs gids cant be null")
+		return nil, err
+	}
+	var groups []*GroupInfo
+	o := orm.NewOrm()
+	if _, err = o.Raw("select DISTINCT(g_id), nick_name, head_small_image_url from `group` where ? like concat('%,', g_id)"+
+		"or ? like concat('%,', g_id, ',%')"+"or ? like concat(g_id, ',%')"+"or ? = g_id;", gids, gids, gids, gids).QueryRows(&groups); err != nil {
+		logs.Error("GetGroupInfoByGIDs failed, err is ", err.Error())
+		return nil, err
+	}
+	return groups, nil
 }

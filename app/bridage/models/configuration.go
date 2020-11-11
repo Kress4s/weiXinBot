@@ -182,14 +182,12 @@ func DeleteConifgForWxMigration(wxidOrPlanid interface{}) (err error) {
 		if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID", wxid).Delete(); err == nil {
 			logs.Debug("Number of Configuration deleted in database:", num)
 			return
-		} else if grouplanid, ok := wxidOrPlanid.(int64); ok {
-			// 删除方案批量清空配置
-			if num, err = o.QueryTable(new(Configuration)).Filter("GrouplainID", grouplanid).Delete(); err == nil {
-				logs.Debug("Number of Configuration deleted in database:", num)
-			}
 		}
-	} else {
-		err = fmt.Errorf("DeleteConifgForWxMigration WXIDs is not string")
+	} else if grouplanid, ok := wxidOrPlanid.(int64); ok {
+		// 删除方案批量清空配置
+		if num, err = o.QueryTable(new(Configuration)).Filter("GrouplanID", grouplanid).Delete(); err == nil {
+			logs.Debug("Number of Configuration deleted in database:", num)
+		}
 	}
 	return
 }

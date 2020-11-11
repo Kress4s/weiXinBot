@@ -208,10 +208,10 @@ func DeleteTimeTaskByID(id int64) (err error) {
 }
 
 // GetAllRecode ...
-func GetAllRecode(manager, status string) (ret interface{}, count int64, err error) {
+func GetAllRecode(manager, status string, limit, offset int64) (ret interface{}, count int64, err error) {
 	o := orm.NewOrm()
 	var l []*bridageModels.TimeTaskRecode
-	if count, err = o.QueryTable(new(bridageModels.TimeTaskRecode)).Filter("Manager", manager).Filter("Status", status).All(&l); err != nil {
+	if count, err = o.QueryTable(new(bridageModels.TimeTaskRecode)).Filter("Manager", manager).Filter("Status", status).Limit(limit, offset).OrderBy("-ID").All(&l); err != nil {
 		logs.Error("GetAllRecode failed, err is ", err.Error())
 		return nil, 0, err
 	}

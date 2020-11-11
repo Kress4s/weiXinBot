@@ -116,9 +116,7 @@ func (c *GroupController) GetAll() {
 	}
 	// offset: 0 (default is 0)
 	if v, err := c.GetInt64("offset"); err == nil {
-		// 配合奇葩vue offset 初始为1
-		offset = v - 1
-		// offset = v
+		offset = v
 	}
 	// sortby: col1,col2
 	if v := c.GetString("sortby"); v != "" {
@@ -247,4 +245,25 @@ func (c *GroupController) MultiPut() {
 		return
 	}
 	err = models.MultiUpdateGroupByID(v.Data, moveOutGroups)
+}
+
+// GetGroupsByGID ...
+// @router /getgroupbygid [get]
+func (c *GroupController) GetGroupsByGID() {
+	var gids string
+	var v interface{}
+	var err error
+	defer func() {
+		if err == nil {
+			c.Data["json"] = common.RestResult{Code: 0, Message: "ok", Data: v}
+		} else {
+			c.Data["json"] = common.RestResult{Code: -1, Message: err.Error()}
+		}
+		c.ServeJSON()
+	}()
+	if gids = c.GetString("gids"); gids == "" {
+		err = fmt.Errorf("gids cant be null")
+		return
+	}
+	v, err = bridageModels.GetGroupInfoByGIDs(gids)
 }

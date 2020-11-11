@@ -186,6 +186,7 @@ func (c *TimeTaskController) Delete() {
 func (c *TimeTaskController) GetAllTaksRecode() {
 	var manager string
 	var status string
+	var limit, offset int64
 	var l interface{}
 	var count int64
 	var err error
@@ -207,8 +208,15 @@ func (c *TimeTaskController) GetAllTaksRecode() {
 		err = fmt.Errorf("manager cant be null")
 		return
 	}
+	if v, err := c.GetInt64("limit"); err == nil {
+		limit = v
+	}
+	// offset: 0 (default is 0)
+	if v, err := c.GetInt64("offset"); err == nil {
+		offset = v
+	}
 	if status = c.GetString("status"); status == "" {
 		status = constant.SENDED
 	}
-	l, count, err = models.GetAllRecode(manager, status)
+	l, count, err = models.GetAllRecode(manager, status, limit, offset)
 }

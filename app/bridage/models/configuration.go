@@ -20,14 +20,6 @@ type Configuration struct {
 	GrouplanID int64  `orm:"column(grouplan_id)"`           // 所属的方案
 }
 
-// GBGRelation ...
-type GBGRelation struct {
-	ID         int64  `orm:"auto;column(id)"`              //
-	GrouplanID int64  `orm:"column(grouplan_id)"`          //所属方案
-	BotWXID    string `orm:"column(bot_wxid)"`             //微信号
-	ObjectIDS  string `orm:"size(200);column(object_ids)"` //微信号下面的群号
-}
-
 // MultiDealConfig ...
 type MultiDealConfig struct {
 	Type         int
@@ -40,7 +32,7 @@ type MultiDealConfig struct {
 }
 
 func init() {
-	orm.RegisterModel(new(Configuration), new(GBGRelation))
+	orm.RegisterModel(new(Configuration))
 }
 
 // GroupIsNeedServer 查看此群是否需要机器人服务
@@ -196,19 +188,27 @@ func DeleteConifgForWxMigration(wxidOrPlanid interface{}) (err error) {
 func UpdateConfigByCutPlan(BotWXID, gid string, grouplanID int64) (err error) {
 	var configs []*Configuration
 	o := orm.NewOrm()
-	// strings.ReplaceAll()
 	if _, err = o.QueryTable(new(Configuration)).Filter("BotWXID", BotWXID).Filter("GrouplanID", grouplanID).
 		Filter("ObjectIDS__contains", gid).All(&configs); err == nil {
-		for _, config := range configs {
-			if strings.Contains(config.ObjectIDS, gid+",") {
-				config.ObjectIDS = strings.ReplaceAll(config.ObjectIDS, gid+",", "")
-			} else {
-				config.ObjectIDS = strings.ReplaceAll(config.ObjectIDS, ","+gid, "")
-			}
-			if _, err = o.Update(&config, "ObjectIDS"); err != nil {
-				logs.Error("UpdateConfigByCutPlan: update config failed, err is ", err.Error())
-				return
-			}
+		// 因为一个方案下的一个微信号的配置的群都是一样的,去掉被转移方案的群号,取一个值批量更新
+		var _objectids string
+		if strings.Contains(configs[0].ObjectIDS, gid+",") {
+			_objectids = strings.ReplaceAll(configs[0].ObjectIDS, gid+",", "")
+		} else if strings.Contains(configs[0].ObjectIDS, ","+gid) {
+			_objectids = strings.ReplaceAll(configs[0].ObjectIDS, ","+gid, "")
+		} else if configs[0].ObjectIDS == gid {
+			_objectids = strings.ReplaceAll(configs[0].ObjectIDS, gid, "")
+		} else {
+			logs.Error("UpdateConfigByCutPlan: config objectsids is null, bot[%s], grouplanID[%d]", BotWXID, grouplanID)
+			return
+		}
+		// 防止一个方案下所有的群都被替换了，为空了 此时应该把这个方案下所有的配置都山删掉
+		var num int64
+		if num, err = o.QueryTable(new(Configuration)).Filter("BotWXID", BotWXID).Filter("GrouplanID", grouplanID).
+			Filter("ObjectIDS__contains", gid).Update(orm.Params{
+			"ObjectIDS": _objectids,
+		}); err == nil {
+			logs.Debug("Number of Configuration deleted in database:", num)
 		}
 	}
 	return

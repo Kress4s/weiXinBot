@@ -248,7 +248,7 @@ func MultiUpdateGroupByID(m []*bridageModels.Group, delgroupsIDs string) (err er
 		} else {
 			// 已存在
 			var _M = bridageModels.Group{GID: _m.GID, Bots: _m.Bots}
-			if err = o.Read(&_M, "GID", "Bots"); err == nil {
+			if err = o.QueryTable(new(bridageModels.Group)).Filter("GID", _m.GID).Filter("Bots", _m.Bots).RelatedSel().One(&_M); err == nil {
 				if _M.GroupPlan != nil && _M.GroupPlan.ID != _m.GroupPlan.ID {
 					// 该群之前有配置且当前配置切换了方案
 					// 修改配置表的objectids

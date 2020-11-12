@@ -2,7 +2,6 @@ package models
 
 import (
 	"strconv"
-	"strings"
 	bridageModels "weiXinBot/app/bridage/models"
 
 	"github.com/astaxie/beego/logs"
@@ -52,8 +51,7 @@ func UpdateOrAddConfig(m bridageModels.MultiDealConfig) (err error) {
 			_config := bridageModels.Configuration{Type: config.Type, FuncID: config.FuncID, FuncType: config.FuncType, BotWXID: config.BotWXID}
 			if err = o.Read(&_config, "Type", "FuncType", "FuncID", "BotWXID"); err != nil {
 				if err == orm.ErrNoRows {
-					_config.ObjectIDS = config.ObjectIDS
-					if _, err = o.Insert(&_config); err != nil {
+					if _, err = o.Insert(&config); err != nil {
 						return
 					}
 					err = nil
@@ -66,55 +64,6 @@ func UpdateOrAddConfig(m bridageModels.MultiDealConfig) (err error) {
 					return
 				}
 				logs.Debug("Number of Bot update in database:", num)
-			}
-		}
-	}
-	return
-}
-
-// GetConfigRelation ...
-func GetConfigRelation(grouplanID int64) (ret interface{}, err error) {
-	o := orm.NewOrm()
-	var l []bridageModels.GBGRelation
-	if _, err = o.QueryTable(new(bridageModels.GBGRelation)).Filter("GrouplanID", grouplanID).All(&l); err != nil {
-		logs.Error("Get ConfigRelation failed, err is ", err.Error())
-		return nil, err
-	}
-	return l, nil
-}
-
-// UpdateConfigRelation ...
-func UpdateConfigRelation(m []bridageModels.GBGRelation, WXID string, grouplanID int64) (err error) {
-	o := orm.NewOrm()
-	defer func() {
-		if err == nil {
-			o.Commit()
-		} else {
-			o.Rollback()
-		}
-	}()
-	o.Begin()
-	if len(WXID) != 0 {
-		WXIDSlice := strings.Split(WXID, ",")
-		if _, err = o.QueryTable(new(bridageModels.GBGRelation)).Filter("GrouplanID", grouplanID).Filter("BotWXID__in", WXIDSlice).Delete(); err != nil {
-			logs.Error("delete config  group wxid failed, err is ", err.Error())
-			return
-		}
-	}
-	for _, v := range m {
-		var _v = bridageModels.GBGRelation{GrouplanID: v.GrouplanID, BotWXID: v.BotWXID}
-		if err = o.Read(&_v, "GrouplanID", "BotWXID"); err != nil {
-			if err == orm.ErrNoRows {
-				if _, err = o.Insert(&v); err != nil {
-					logs.Error("GetConfigRelation: insert GrouplanWXRelation failed, err is ", err.Error())
-					return
-				}
-			}
-		} else {
-			v.ID = _v.ID
-			if _, err = o.Update(&v, "ObjectIDS"); err != nil {
-				logs.Error("GetConfigRelation: update GrouplanWXRelation failed, err is ", err.Error())
-				return
 			}
 		}
 	}

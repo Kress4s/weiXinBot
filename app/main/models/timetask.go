@@ -201,7 +201,7 @@ func DeleteTimeTaskByID(id int64) (err error) {
 				return err
 			}
 			// 删除定时任务
-			go timetasker.ModifyTimeTask(v)
+			go timetasker.DeleteTimeTask(v)
 		}
 	}
 	return

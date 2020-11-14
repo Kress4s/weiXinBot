@@ -20,6 +20,7 @@ type TimeTask struct {
 	SendType    int    `orm:"column(sendtype)"`             // 类型(-1:立刻推送; 0:间隔时间执行; 1:单次执行; 2:按天发送; 3:按周发送; 4:按月发送;)
 	SetUpFormat string `orm:"size(20);column(setupformat)"` // 设置定时格式的表达式
 	BotWXID     string `orm:"size(30);column(botwxid)"`     // 设置的发送的微信号
+	BotNickName string `orm:"size(50);column(botnickname)"` // 发送信号的昵称
 	ObjectsIDS  string `orm:"size(1000);column(objectids)"` // 群组或者联系人
 	Manager     string `orm:"size(30);column(manager)"`     // 属于哪个用户的任务(用户Tel)
 	Resource    string `orm:"size(20);column(resource)"`    // 发送内容(多个)
@@ -28,16 +29,17 @@ type TimeTask struct {
 
 // TimeTaskRecode ...
 type TimeTaskRecode struct {
-	ID         int64     `orm:"auto;column(id)"`                      //
-	Title      string    `orm:"size(50);column(title)"`               // 推送内容的标题
-	Type       string    `orm:"size(30);column(type)"`                // 任务内容类型(message:发消息;announcement:公告...)
-	BotWXID    string    `orm:"size(30);column(botwxid)"`             // 设置的发送的微信号
-	ObjectsIDS string    `orm:"size(300);column(objectids)"`          // 群组或者联系人
-	SendTime   time.Time `orm:"type(datetime);column(sendtime);null"` // 设置发送时间
-	Status     string    `orm:"size(20);column(status)"`              // 任务状态(UnSend;Sended;)
-	Manager    string    `orm:"size(30);column(manager)"`             // 属于哪个用户的任务(用户Tel)
-	Resource   string    `orm:"size(20);column(resource)"`            // 发送内容(多个)
-	Remark     string    `orm:"size(50);column(remark)"`              // 任务备注
+	ID          int64     `orm:"auto;column(id)"`                      //
+	Title       string    `orm:"size(50);column(title)"`               // 推送内容的标题
+	Type        string    `orm:"size(30);column(type)"`                // 任务内容类型(message:发消息;announcement:公告...)
+	BotWXID     string    `orm:"size(30);column(botwxid)"`             // 设置的发送的微信号
+	BotNickName string    `orm:"size(50);column(botnickname)"`         // 发送信号的昵称
+	ObjectsIDS  string    `orm:"size(300);column(objectids)"`          // 群组或者联系人
+	SendTime    time.Time `orm:"type(datetime);column(sendtime);null"` // 设置发送时间
+	Status      string    `orm:"size(20);column(status)"`              // 任务状态(UnSend;Sended;)
+	Manager     string    `orm:"size(30);column(manager)"`             // 属于哪个用户的任务(用户Tel)
+	Resource    string    `orm:"size(20);column(resource)"`            // 发送内容(多个)
+	Remark      string    `orm:"size(50);column(remark)"`              // 任务备注
 }
 
 func init() {

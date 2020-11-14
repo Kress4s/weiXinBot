@@ -84,6 +84,7 @@ func (c *MessageTask) TaskExcute(p interface{}) (err error) {
 		tr.SendTime = time.Now()
 		tr.ObjectsIDS = v.ObjectsIDS
 		tr.BotWXID = v.BotWXID
+		tr.BotNickName = v.BotNickName
 		tr.Resource = v.Resource
 		tr.Manager = v.Manager
 		if err != nil {
